@@ -1,0 +1,11 @@
+insert  query update delete getmore command flushes mapped  vsize    res faults  locked db idx miss %     qr|qw   ar|aw  netIn netOut  conn set repl       time 
+    *0    202     *0     *0       0    16|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    12k    21k    14  s1  PRI   20:35:15 
+    *0    213     *0     *0       0     1|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    11k    11k    14  s1  PRI   20:35:16 
+    *0    234     *0     *0       0     3|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    13k    12k    14  s1  PRI   20:35:17 
+    *0    242     *0     *0       1     1|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     1|0    13k    12k    14  s1  PRI   20:35:18 
+    *0    226     *0     *0       0     3|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    13k    12k    14  s1  PRI   20:35:19 
+    *0    227     *0     *0       0     1|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     1|0    12k    11k    14  s1  PRI   20:35:20 
+    *0    240     *0     *0       0     3|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     1|0    13k    12k    14  s1  PRI   20:35:21 
+    *0    213     *0     *0       0     9|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    12k    18k    14  s1  PRI   20:35:22 
+    *0    192     *0     *0       1     3|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    11k    10k    14  s1  PRI   20:35:23 
+    *0    216     *0     *0       0     1|0       0  1.23g  3.11g   823m      0  test:0.0%          0       0|0     0|0    12k    11k    14  s1  PRI   20:35:24 
