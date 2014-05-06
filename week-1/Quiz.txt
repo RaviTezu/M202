@@ -11,3 +11,5 @@
 6. How can you add users to a group? Check all that apply. - You can send email invitations to users who are not in MMS | You can add existing MMS users to groups yourself | You can add anyone with MongoDB Jira credentials yourself. 
 
 7. Consider the following output from mongostat (see mongostat_output.txt) - Which of the following statements is true? - The data set is staying the same size.
+
+8. If a disk was highly utilized and struggling to keep up, which CPU-level statistic would you expect to see increased? - %iowait
