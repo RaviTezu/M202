@@ -1,0 +1,17 @@
+You must complete Homework 1.1 before doing this problem.
+
+Use MongoProc. When MongoProc initializes for this homework, it will begin writing and deleting files in the homework_1_2 collection of a database called m202 in the host you set up for Homework 1.1. This will take approximately 2 hours. Feel free to work on other things while this runs in the background.
+
+After 2 hours, look at your MMS Monitoring console, and determine how many inserts (and deletes) per second there are for your host. You're going to want to use a resolution of 1 hour. At the one-second level, or even the one-minute level, the data will jump around too much for you to see the average value, so you probably won't be able to use mongostat for this, unless you write a script to capture the output of mongostat and average it (which MMS Monitoring will do automatically).
+
+When there is enough data for you to determine an answer, insert a document into the answers collection of the m202 database. The document you insert should have the following form: {'homework':'homework_1.2', 'answer':12313}. The value for the answer field in this document should be the number of inserts and deletes per second for your host.
+
+Answer:
+
+- mongo
+
+- use m202
+
+- db.answers.insert({'homework':'homework_1.2', 'answer':10.54})
+
+You'll see the 10.54 value on mms console on opcounters chart. 
