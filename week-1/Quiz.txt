@@ -1,0 +1,7 @@
+1. How many MMS monitoring agents should you run for a production system? - More then 1 for redundancy. 
+
+2. What is typically the cause of a low ulimit warning in MMS monitoring? - The resources available to mongod may be too limited.
+
+3. Below are several groupings for stats you can view in MMS monitoring. Select those groups containing stats that are usually correlated with one another. - opcounters, lock% | lock%, journal stats, flush average | non-mapped virtual memory, connections | cursors, connections
+
+4. Extrapolating from this lesson, which of the following might cause different members of a replica set to have different opcounter values? Check all that apply. - You are reading only from the primary. | You have read preference set to secondaryPreferred. | The primary will receive reads from each secondary as they read the oplog.
