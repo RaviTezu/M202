@@ -24,3 +24,8 @@ When using NFS ensure that your journal files and data files are stored on the s
 - Avoid it if you can.[answer]
 NFS is strongly recommended for use with MongoDB.
 NFS significantly helps write performance.
+
+Why should you allocate swap space when using MongoDB? Check all that apply.
+For use by MongoDB
+To keep the kernel from killing MongoDB when running short on memory[Yes] - As a consequence of OOM error
+To give you as an administrator greater control over how memory is used on a system running MongoDB[Yes]
