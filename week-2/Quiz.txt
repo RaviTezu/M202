@@ -1,4 +1,4 @@
-http://docs.mongodb.org/manual/faq/storage/
+http://docs.mongodb.org/manual/faq/storage/ - more on storage
 
 By default, which algorithm is used to determine which pages of memory are discarded by the kernel? - LRU(Least recently Used)
 What offers the best performance in terms of Resident Memory? - Full data set fits into resident memory
