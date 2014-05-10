@@ -9,3 +9,10 @@ Why would you want to pre-heat a specific subset of a MongoDB dataset? - You hav
 You don't have enough SSD's to put your full data set on them; some must go into spinning media. Which of the following should be placed on spinning media in a read heavy system? - Capped collections, oplog - because capped collections have sequential access pattern.
 
 http://docs.mongodb.org/manual/administration/production-notes/
+
+
+Which of the following is a potentially bad system configuration for MongoDB? 
+NUMA System using MongoDB init scripts[Init script can handle it]
+NUMA System with NUMA disabled in BIOS[No prob.]
+- NUMA system running mongod manually [Answer]
+non-NUMA system running mongod manually[No prob.]
