@@ -43,3 +43,10 @@ Data to be read from optical storage
 Data to be read from SSDs[yes] - it is recommended to have lower readahead for SSD's how low? 16sectors - 32 sectors
 Sequential documents that are often accessed together
 Documents that are accessed randomly
+
+Which of the following scenarios might cause increases on the CPU usage metrics reported in the MMS hardware tab? Check all that apply.
+Saturated I/O
+Large counts or distincts
+Complex MapReduce operations
+Large in-memory sorts
+Aggregation queries [All]
