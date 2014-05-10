@@ -1,4 +1,11 @@
 http://docs.mongodb.org/manual/faq/storage/ - more on storage
 
 By default, which algorithm is used to determine which pages of memory are discarded by the kernel? - LRU(Least recently Used)
+
 What offers the best performance in terms of Resident Memory? - Full data set fits into resident memory
+
+Why would you want to pre-heat a specific subset of a MongoDB dataset? - You have not used a particular dataset, but you expect to be using that dataset in the immediate future.So, there wouldn't be any lag for users/application while accessing it. 
+
+You don't have enough SSD's to put your full data set on them; some must go into spinning media. Which of the following should be placed on spinning media in a read heavy system? - Capped collections, oplog - because capped collections have sequential access pattern.
+
+
