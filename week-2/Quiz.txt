@@ -16,3 +16,5 @@ NUMA System using MongoDB init scripts[Init script can handle it]
 NUMA System with NUMA disabled in BIOS[No prob.]
 - NUMA system running mongod manually [Answer]
 non-NUMA system running mongod manually[No prob.]
+
+Which of the following are recommended filesystems for use with MongoDB? - ext4, xfs [ext3 is supported but not recommended as it doesn't support fallocate()]
