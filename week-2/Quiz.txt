@@ -29,3 +29,17 @@ Why should you allocate swap space when using MongoDB? Check all that apply.
 For use by MongoDB
 To keep the kernel from killing MongoDB when running short on memory[Yes] - As a consequence of OOM error
 To give you as an administrator greater control over how memory is used on a system running MongoDB[Yes]
+
+Which of the following can readahead settings effect? Check all that apply.
+The efficiency of your data storage in memory[yes]
+Seek times
+Data locality
+How often you access disk[yes]
+Data access patterns
+
+Increasing readahead will give the least increase in performance in which of the following scenarios?
+Data to be read from spinning disks
+Data to be read from optical storage
+Data to be read from SSDs[yes] - it is recommended to have lower readahead for SSD's how low? 16sectors - 32 sectors
+Sequential documents that are often accessed together
+Documents that are accessed randomly
