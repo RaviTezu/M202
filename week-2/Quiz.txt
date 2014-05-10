@@ -18,3 +18,9 @@ NUMA System with NUMA disabled in BIOS[No prob.]
 non-NUMA system running mongod manually[No prob.]
 
 Which of the following are recommended filesystems for use with MongoDB? - ext4, xfs [ext3 is supported but not recommended as it doesn't support fallocate()]
+
+Which of the following is the recommendation for using MongoDB on NFS?
+When using NFS ensure that your journal files and data files are stored on the same volume. [It is recommended to have the journal files on different storage, however this complicate backups]
+- Avoid it if you can.[answer]
+NFS is strongly recommended for use with MongoDB.
+NFS significantly helps write performance.
