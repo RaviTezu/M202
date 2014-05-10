@@ -45,7 +45,7 @@ Sequential documents that are often accessed together
 Documents that are accessed randomly
 
 Which of the following scenarios might cause increases on the CPU usage metrics reported in the MMS hardware tab? Check all that apply.
-Saturated I/O
+Saturated I/O[Overloaded IO]
 Large counts or distincts
 Complex MapReduce operations
 Large in-memory sorts
