@@ -1,9 +1,3 @@
-- Download the give fragDB from the site and place it in you dbpath[You may find this config. param in /etc/mongodb.conf]
-
-- Make sure these fragDB.{0,1,2,ns} files have the same permissions as other db files.
-
-- Open up the mongo shell and you should be seeing the fragDB when you run `show dbs`.
-
 Question:
 
 Over time a MongoDB database can become fragmented and cause reduced storage efficiency.
@@ -23,6 +17,12 @@ Database Storage Efficiency:
 
 Answer: 
 ===
+- Download the given fragDB from the site and place it in you dbpath[You may find this config. param in /etc/mongodb.conf]
+
+- Make sure these fragDB.{0,1,2,ns} files have the same permissions as other db files.
+
+- Open up the mongo shell and you should be seeing the fragDB when you run `show dbs`.
+
 > show dbs
 admin   (empty)
 fragDB  0.453GB
