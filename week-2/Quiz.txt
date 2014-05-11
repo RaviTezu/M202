@@ -50,3 +50,10 @@ Large counts or distincts
 Complex MapReduce operations
 Large in-memory sorts
 Aggregation queries [All]
+
+Which of the following are settings you should consider when it's appropriate to reduce the disk space a mongod process consumes.
+--nodisk
+--smallfiles[yes]
+--nojournal[yes, not for prod. hosts and should be used for testing/arbiter hosts]
+--oplogSize[yes]
+--noDataFiles
