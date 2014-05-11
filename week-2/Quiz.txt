@@ -87,3 +87,17 @@ MongoDB runs most efficiently in this configuration
 Enables you to pull out a single secondary temporarily (e.g., for an upgrade) without downtime or too much risk[yes]
 The cost of production servers capable of running three mongod processes currently is something of a sweet spot in terms of price
 This is the only configuration that permits three voting members and guarantees some redundancy
+
+Which of the following are common reasons some deployments have more than three replica set nodes?
+So that they may include a node purely for analytics[yes]
+To include a node for backups[yes]
+Because resources will permit additional nodes
+To distribute a replica set across multiple data centers[yes]
+To include a less powerful node you do not want clients to access, but require for some other purpose[yes]
+
+From where do replica set secondaries sync by default? 
+From the primary
+From the nearest member[yes]
+From a secondary in the same data center
+From a randomly selected member
+From the nearest member unless that member is already syncing from a secondary
