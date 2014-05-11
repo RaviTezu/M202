@@ -65,3 +65,10 @@ secondary
 hidden secondary
 priority 0 secondary
 arbiter[yes, because all the above hosts has data]
+
+Which of the following will enable you to reclaim disk space? Check all that apply. 
+Using the compact command
+Using the resync command with a standalone mongodb instance
+Using resync with a replica set[yes]
+Using the repair command[yes]
+Using the reclaim command
