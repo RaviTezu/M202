@@ -74,3 +74,16 @@ Using the repair command[yes]
 Using the reclaim command
 
 MongoDB tracks disk space usage. [false]
+
+If you are going to run multiple mongod processes on the same host, which of the following should you do?
+Benchmark memory usage under production load[yes]
+Measure the number of file descriptors used by a process under production load[yes]
+Follow MongoDB documentation guidelines for isolating processes and setting limits[There's nothing like this]
+Benchmark IO usage under production load[yes]
+
+A three node replica set with a primary and two data-bearing secondaries is the most common deployment. What are some reasons for this?
+Provides a sufficient guarantee of high availability and distaster recovery for most applications[yes]
+MongoDB runs most efficiently in this configuration
+Enables you to pull out a single secondary temporarily (e.g., for an upgrade) without downtime or too much risk[yes]
+The cost of production servers capable of running three mongod processes currently is something of a sweet spot in terms of price
+This is the only configuration that permits three voting members and guarantees some redundancy
