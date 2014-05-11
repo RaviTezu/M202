@@ -57,3 +57,11 @@ Which of the following are settings you should consider when it's appropriate to
 --nojournal[yes, not for prod. hosts and should be used for testing/arbiter hosts]
 --oplogSize[yes]
 --noDataFiles
+
+
+For which replica set members is it appropriate to use the --nojournal option? 
+primary
+secondary
+hidden secondary
+priority 0 secondary
+arbiter[yes, because all the above hosts has data]
