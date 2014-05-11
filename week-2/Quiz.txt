@@ -72,3 +72,5 @@ Using the resync command with a standalone mongodb instance
 Using resync with a replica set[yes]
 Using the repair command[yes]
 Using the reclaim command
+
+MongoDB tracks disk space usage. [false]
