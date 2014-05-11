@@ -1,0 +1,61 @@
+- Download the give fragDB from the site and place it in you dbpath[You may find this config. param in /etc/mongodb.conf]
+
+- Make sure these fragDB.{0,1,2,ns} files have the same permissions as other db files.
+
+- Open up the mongo shell and you should be seeing the fragDB when you run `show dbs`.
+
+Question:
+
+Over time a MongoDB database can become fragmented and cause reduced storage efficiency.
+
+In this problem we have provided you with an already fragmented database. You will want to extract the given handout and set mongod's dbpath to the appropriate folder.
+
+Your goal in this homework is to increase storage efficiency and reclaim disk space. You may use any method learned thus far to accomplish this goal. However, please do not tamper (remove/update/insert) with the database given apart from querying it to find out more information about the fragmented components.
+
+You are encouraged to use MongoProc to continuously test your progress until you are ready to grade the homework.
+
+Useful Formulas: 
+Collection Storage Efficiency:
+db.collection.stats().size/db.collection.stats().storageSize
+Database Storage Efficiency:
+(db.stats().dataSize + db.stats().indexSize) / db.stats().fileSize
+
+
+Answer: 
+===
+> show dbs
+admin   (empty)
+fragDB  0.453GB
+local   0.078GB
+> use fragDB
+switched to db fragDB
+> show collections
+fragColl
+system.indexes
+> db.fragColl.stats().size
+48000000
+> db.fragColl.stats().storageSize
+335900672
+> db.runCommand({compact: 'fragColl'})
+{ "ok" : 1 }
+> db.fragColl.stats().size
+48000000
+> db.fragColl.stats().storageSize
+66904064
+
+When you test this with your mongoProc, it will tell you that.. "Collection storage efficiecnt has been improved. Disk space has not been reclaimed."
+
+> (db.stats().dataSize + db.stats().indexSize) / db.stats().fileSize
+0.11291854722159249
+> (db.stats().dataSize + db.stats().indexSize)
+53044848
+> db.stats().fileSize
+469762048
+> db.repairDatabase()
+{ "ok" : 1 }
+> (db.stats().dataSize + db.stats().indexSize)
+53044848
+> db.stats().fileSize
+201326592
+
+And DONE! Testing with mongoProc says "Collection storage efficiecnt has been improved. Disk space has been reclaimed!"
