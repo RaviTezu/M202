@@ -1,3 +1,103 @@
 http://docs.mongodb.org/manual/faq/storage/ - more on storage
 
 By default, which algorithm is used to determine which pages of memory are discarded by the kernel? - LRU(Least recently Used)
+
+What offers the best performance in terms of Resident Memory? - Full data set fits into resident memory
+
+Why would you want to pre-heat a specific subset of a MongoDB dataset? - You have not used a particular dataset, but you expect to be using that dataset in the immediate future.So, there wouldn't be any lag for users/application while accessing it. 
+
+You don't have enough SSD's to put your full data set on them; some must go into spinning media. Which of the following should be placed on spinning media in a read heavy system? - Capped collections, oplog - because capped collections have sequential access pattern.
+
+**http://docs.mongodb.org/manual/administration/production-notes/** - Read them more often
+
+
+Which of the following is a potentially bad system configuration for MongoDB? 
+NUMA System using MongoDB init scripts[Init script can handle it]
+NUMA System with NUMA disabled in BIOS[No prob.]
+- NUMA system running mongod manually [Answer]
+non-NUMA system running mongod manually[No prob.]
+
+Which of the following are recommended filesystems for use with MongoDB? - ext4, xfs [ext3 is supported but not recommended as it doesn't support fallocate()]
+
+Which of the following is the recommendation for using MongoDB on NFS?
+When using NFS ensure that your journal files and data files are stored on the same volume. [It is recommended to have the journal files on different storage, however this complicate backups]
+- Avoid it if you can.[answer]
+NFS is strongly recommended for use with MongoDB.
+NFS significantly helps write performance.
+
+Why should you allocate swap space when using MongoDB? Check all that apply.
+For use by MongoDB
+To keep the kernel from killing MongoDB when running short on memory[Yes] - As a consequence of OOM error
+To give you as an administrator greater control over how memory is used on a system running MongoDB[Yes]
+
+Which of the following can readahead settings effect? Check all that apply.
+The efficiency of your data storage in memory[yes]
+Seek times
+Data locality
+How often you access disk[yes]
+Data access patterns
+
+Increasing readahead will give the least increase in performance in which of the following scenarios?
+Data to be read from spinning disks
+Data to be read from optical storage
+Data to be read from SSDs[yes] - it is recommended to have lower readahead for SSD's how low? 16sectors - 32 sectors
+Sequential documents that are often accessed together
+Documents that are accessed randomly
+
+Which of the following scenarios might cause increases on the CPU usage metrics reported in the MMS hardware tab? Check all that apply.
+Saturated I/O[Overloaded IO]
+Large counts or distincts
+Complex MapReduce operations
+Large in-memory sorts
+Aggregation queries [All]
+
+Which of the following are settings you should consider when it's appropriate to reduce the disk space a mongod process consumes.
+--nodisk
+--smallfiles[yes]
+--nojournal[yes, not for prod. hosts and should be used for testing/arbiter hosts]
+--oplogSize[yes]
+--noDataFiles
+
+
+For which replica set members is it appropriate to use the --nojournal option? 
+primary
+secondary
+hidden secondary
+priority 0 secondary
+arbiter[yes, because all the above hosts has data]
+
+Which of the following will enable you to reclaim disk space? Check all that apply. 
+Using the compact command
+Using the resync command with a standalone mongodb instance
+Using resync with a replica set[yes]
+Using the repair command[yes]
+Using the reclaim command
+
+MongoDB tracks disk space usage. [false]
+
+If you are going to run multiple mongod processes on the same host, which of the following should you do?
+Benchmark memory usage under production load[yes]
+Measure the number of file descriptors used by a process under production load[yes]
+Follow MongoDB documentation guidelines for isolating processes and setting limits[There's nothing like this]
+Benchmark IO usage under production load[yes]
+
+A three node replica set with a primary and two data-bearing secondaries is the most common deployment. What are some reasons for this?
+Provides a sufficient guarantee of high availability and distaster recovery for most applications[yes]
+MongoDB runs most efficiently in this configuration
+Enables you to pull out a single secondary temporarily (e.g., for an upgrade) without downtime or too much risk[yes]
+The cost of production servers capable of running three mongod processes currently is something of a sweet spot in terms of price
+This is the only configuration that permits three voting members and guarantees some redundancy
+
+Which of the following are common reasons some deployments have more than three replica set nodes?
+So that they may include a node purely for analytics[yes]
+To include a node for backups[yes]
+Because resources will permit additional nodes
+To distribute a replica set across multiple data centers[yes]
+To include a less powerful node you do not want clients to access, but require for some other purpose[yes]
+
+From where do replica set secondaries sync by default? 
+From the primary
+From the nearest member[yes]
+From a secondary in the same data center
+From a randomly selected member
+From the nearest member unless that member is already syncing from a secondary
