@@ -4,3 +4,8 @@ DISASTER RECOVERY AND BACKUP:
 1. In a year, what is the maximum number of days of downtime you can have and still claim >99% uptime? [3] - 4 days downtime would be 98.9% availability.
 
 2. What are the key criteria for deciding your disaster recovery requirements?
+Tolerance for data loss[T]
+Tolerance for downtime[T]
+Tolerance for reduced capacity[T]
+Tolerance for CPU-intensive queries
+Tolerance to iocane powder
