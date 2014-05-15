@@ -16,3 +16,11 @@ Data storage for a system that need only deliver information once a month
 Online ad servers[T]
 A system with several redundant servers and low concern for consistency
 A system using MongoDB only as an in-memory cache in front of a relational database
+
+4. What conclusions regarding downtime and data loss should we draw in considering 2-node replica sets vs. single node deployments in MongoDB? Check all that apply. 
+Chances for downtime are increased[T] - As they won't provide an HA and you have onemore node to go down. 
+Chances for downtime are decreased
+Chances for downtime are unaffected
+Chances for data loss are increased
+Chances for data loss are decreased[T]
+Chances for data loss are unaffected
