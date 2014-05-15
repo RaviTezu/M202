@@ -9,3 +9,10 @@ Tolerance for downtime[T]
 Tolerance for reduced capacity[T]
 Tolerance for CPU-intensive queries
 Tolerance to iocane powder
+
+3. Which of the following systems might have a low tolerance for both data loss and downtime? 
+Cache in front of the system of record
+Data storage for a system that need only deliver information once a month
+Online ad servers[T]
+A system with several redundant servers and low concern for consistency
+A system using MongoDB only as an in-memory cache in front of a relational database
