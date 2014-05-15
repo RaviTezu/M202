@@ -39,3 +39,10 @@ Do I need to do backups?
 How quickly can I restore?[T]
 What complications are distributed systems introducing?[T]
 Is my test strategy catching errors in backups?[T]
+
+8. What impacts might a snapshot based backup strategy have on a live system? Check all that apply.
+Slower operations[T]
+You will have to shut your system down to do it
+Slower disk I/O[T]
+It's not free[T]
+There are no obvious impacts
