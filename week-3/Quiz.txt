@@ -31,3 +31,11 @@ A courseware system used during the teaching day at an elementary school[T]
 The blogging system used by the London Times
 A retail banking transaction system
 Gmail
+
+6. If you have 5 data centers across which your sharded cluster is distributed, how many data centers will be without a config server? - 2
+
+7. With regard to backing up your data, which of the following questions should you take time to consider?
+Do I need to do backups?
+How quickly can I restore?[T]
+What complications are distributed systems introducing?[T]
+Is my test strategy catching errors in backups?[T]
