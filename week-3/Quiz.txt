@@ -24,3 +24,10 @@ Chances for downtime are unaffected
 Chances for data loss are increased
 Chances for data loss are decreased[T]
 Chances for data loss are unaffected
+
+5. Which of the following systems might have a low tolerance for data loss, but a high tolerance for downtime? 
+The navigation system used by automobiles manufactured by Ford
+A courseware system used during the teaching day at an elementary school[T]
+The blogging system used by the London Times
+A retail banking transaction system
+Gmail
