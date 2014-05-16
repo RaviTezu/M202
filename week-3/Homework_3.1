@@ -1,0 +1,224 @@
+In this problem we have provided you with a replica set that is corrupted. You will start out with a working primary, a corrupted secondary, and a working arbiter. Your goal is to recover the replica set by doing the necessary work to ensure the secondary has an uncorrupted version of the data.
+
+Please download and extract the handouts. There are three data directories: one for the primary, secondary, and arbiter. On your host, you will need to run mongods for each of these on ports 30001, 30002, and 30003, respectively. If you initially find that the mongod running on port 30002 is a primary, please step it down. To get the replica set up and running, each node should be launched as follows:
+
+Primary:
+mongod --port 30001 --dbpath mongod-pri --replSet CorruptionTest --smallfiles --oplogSize 128
+Secondary
+mongod --port 30002 --dbpath mongod-sec --replSet CorruptionTest --smallfiles --oplogSize 128
+Arbiter
+mongod --port 30003 --dbpath mongod-arb --replSet CorruptionTest
+
+For this problem, do not attempt to configure MongoProc's port settings. You may still configure the host setting.
+The corrupt data is in the data files found within the mongod-sec directory. Specifically, the testColl collection of the testDB database is corrupted. You can generate an error due to the corruption by running a .find().explain() query on this collection.
+
+Bring the secondary back on line with uncorrupted data. When you believe you have done this, use MongoProc to test and, if correct, submit the homework
+
+You have used 0 of 3 submissions.
+
+Answer: 
+
+- After starting it you can login to any of the RS node shell for checking which is P/S/A: mongo --port 30002 
+- ravitezu@terminator:~/Downloads$ mongo --port 30002
+MongoDB shell version: 2.6.1
+connecting to: 127.0.0.1:30002/test
+CorruptionTest:SECONDARY> 
+CorruptionTest:SECONDARY> 
+CorruptionTest:SECONDARY> rs.status()
+{
+	"set" : "CorruptionTest",
+	"date" : ISODate("2014-05-16T16:54:40Z"),
+	"myState" : 2,
+	"syncingTo" : "127.0.0.1:30001",
+	"members" : [
+		{
+			"_id" : 0,
+			"name" : "127.0.0.1:30001",
+			"health" : 1,
+			"state" : 1,
+			"stateStr" : "PRIMARY",
+			"uptime" : 229,
+			"optime" : Timestamp(1399499925, 7077),
+			"optimeDate" : ISODate("2014-05-07T21:58:45Z"),
+			"lastHeartbeat" : ISODate("2014-05-16T16:54:39Z"),
+			"lastHeartbeatRecv" : ISODate("2014-05-16T16:54:40Z"),
+			"pingMs" : 0,
+			"electionTime" : Timestamp(1400259057, 1),
+			"electionDate" : ISODate("2014-05-16T16:50:57Z")
+		},
+		{
+			"_id" : 1,
+			"name" : "127.0.0.1:30002",
+			"health" : 1,
+			"state" : 2,
+			"stateStr" : "SECONDARY",
+			"uptime" : 246,
+			"optime" : Timestamp(1399499925, 7077),
+			"optimeDate" : ISODate("2014-05-07T21:58:45Z"),
+			"self" : true
+		},
+		{
+			"_id" : 2,
+			"name" : "127.0.0.1:30003",
+			"health" : 1,
+			"state" : 7,
+			"stateStr" : "ARBITER",
+			"uptime" : 167,
+			"lastHeartbeat" : ISODate("2014-05-16T16:54:39Z"),
+			"lastHeartbeatRecv" : ISODate("2014-05-16T16:54:39Z"),
+			"pingMs" : 0
+		}
+	],
+	"ok" : 1
+}
+CorruptionTest:SECONDARY> show collections
+2014-05-16T22:26:02.930+0530 error: { "$err" : "not master and slaveOk=false", "code" : 13435 } at src/mongo/shell/query.js:131
+CorruptionTest:SECONDARY> show dbs
+admin   (empty)
+local   0.281GB
+test    (empty)
+testDB  0.125GB
+CorruptionTest:SECONDARY> use testDB
+switched to db testDB
+CorruptionTest:SECONDARY> show collections
+2014-05-16T22:26:20.831+0530 error: { "$err" : "not master and slaveOk=false", "code" : 13435 } at src/mongo/shell/query.js:131
+CorruptionTest:SECONDARY> rs.slaveOk()
+CorruptionTest:SECONDARY> show collections
+system.indexes
+testColl
+CorruptionTest:SECONDARY> db.testColl.findOne()
+{
+	"_id" : 0,
+	"string" : "testStringForPadding0000000000000000000000000000000000000000",
+	"otherID" : ObjectId("536aac8ef7f5f8e9b4c240ea")
+}
+CorruptionTest:SECONDARY> db.testColl.find().explain()
+2014-05-16T22:27:21.961+0530 error: {
+	"$err" : "BSONObj size: 1685417573 (0x64756E65) is invalid. Size must be between 0 and 16793600(16MB) First element: //drrdu/dvad\u0002string: ?type=111",
+	"code" : 10334
+} at src/mongo/shell/query.js:131
+
+Is shows some error.
+
+- So, now I've stopped the DB using the following command in secondary shell:
+CorruptionTest:SECONDARY> db.shutdownServer()
+shutdown command only works with the admin database; try 'use admin'
+CorruptionTest:SECONDARY> use admin
+switched to db admin
+CorruptionTest:SECONDARY> db.shutdownServer()
+2014-05-16T22:35:21.659+0530 DBClientCursor::init call() failed
+server should be down...
+2014-05-16T22:35:21.662+0530 trying reconnect to 127.0.0.1:30002 (127.0.0.1) failed
+2014-05-16T22:35:21.663+0530 warning: Failed to connect to 127.0.0.1:30002, reason: errno:111 Connection refused
+2014-05-16T22:35:21.663+0530 reconnect 127.0.0.1:30002 (127.0.0.1) failed failed couldn't connect to server 127.0.0.1:30002 (127.0.0.1), connection attempt failed
+2014-05-16T22:35:21.779+0530 trying reconnect to 127.0.0.1:30002 (127.0.0.1) failed
+2014-05-16T22:35:21.779+0530 warning: Failed to connect to 127.0.0.1:30002, reason: errno:111 Connection refused
+2014-05-16T22:35:21.779+0530 reconnect 127.0.0.1:30002 (127.0.0.1) failed failed couldn't connect to server 127.0.0.1:30002 (127.0.0.1), connection attempt failed
+
+- Now I'm out of the shell, as the mongod is stopped. 
+- I've deleted all the files which are under the mongod-sec:
+ravitezu@terminator:~/Downloads$ cd mongod-sec/
+ravitezu@terminator:~/Downloads/mongod-sec$ ls
+journal  local.0  local.1  local.ns  mongod.lock  testDB.0  testDB.1  testDB.2  testDB.ns
+ravitezu@terminator:~/Downloads/mongod-sec$ rm -rf *
+
+- And started the host with the below command(as above):
+ravitezu@terminator:~/Downloads$ mongod --port 30002 --dbpath mongod-sec --replSet CorruptionTest --smallfiles --oplogSize 128
+2014-05-16T22:36:04.767+0530 [initandlisten] MongoDB starting : pid=12969 port=30002 dbpath=mongod-sec 64-bit host=terminator
+2014-05-16T22:36:04.767+0530 [initandlisten] db version v2.6.1
+2014-05-16T22:36:04.767+0530 [initandlisten] git version: 4b95b086d2374bdcfcdf2249272fb552c9c726e8
+2014-05-16T22:36:04.767+0530 [initandlisten] build info: Linux build14.nj1.10gen.cc 2.6.32-431.3.1.el6.x86_64 #1 SMP Fri Jan 3 21:39:27 UTC 2014 x86_64 BOOST_LIB_VERSION=1_49
+2014-05-16T22:36:04.767+0530 [initandlisten] allocator: tcmalloc
+2014-05-16T22:36:04.767+0530 [initandlisten] options: { net: { port: 30002 }, replication: { oplogSizeMB: 128, replSet: "CorruptionTest" }, storage: { dbPath: "mongod-sec", smallFiles: true } }
+2014-05-16T22:36:04.810+0530 [initandlisten] journal dir=mongod-sec/journal
+2014-05-16T22:36:04.810+0530 [initandlisten] recover : no journal files present, no recovery needed
+2014-05-16T22:36:07.856+0530 [initandlisten] preallocateIsFaster=true 37.9
+2014-05-16T22:36:10.916+0530 [initandlisten] preallocateIsFaster=true 37.88
+2014-05-16T22:36:15.197+0530 [initandlisten] preallocateIsFaster=true 41.26
+2014-05-16T22:36:15.198+0530 [initandlisten] preallocateIsFaster check took 10.387 secs
+2014-05-16T22:36:15.198+0530 [initandlisten] preallocating a journal file mongod-sec/journal/prealloc.0
+2014-05-16T22:36:17.124+0530 [initandlisten] preallocating a journal file mongod-sec/journal/prealloc.1
+2014-05-16T22:36:18.963+0530 [initandlisten] preallocating a journal file mongod-sec/journal/prealloc.2
+2014-05-16T22:36:21.096+0530 [FileAllocator] allocating new datafile mongod-sec/local.ns, filling with zeroes...
+2014-05-16T22:36:21.097+0530 [FileAllocator] creating directory mongod-sec/_tmp
+2014-05-16T22:36:21.144+0530 [FileAllocator] done allocating datafile mongod-sec/local.ns, size: 16MB,  took 0.022 secs
+2014-05-16T22:36:21.164+0530 [FileAllocator] allocating new datafile mongod-sec/local.0, filling with zeroes...
+2014-05-16T22:36:21.189+0530 [FileAllocator] done allocating datafile mongod-sec/local.0, size: 16MB,  took 0.024 secs
+2014-05-16T22:36:21.191+0530 [initandlisten] build index on: local.startup_log properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.startup_log" }
+2014-05-16T22:36:21.191+0530 [initandlisten] 	 added index to empty collection
+2014-05-16T22:36:21.191+0530 [initandlisten] command local.$cmd command: create { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0 numYields:0  reslen:37 118ms
+2014-05-16T22:36:21.193+0530 [initandlisten] waiting for connections on port 30002
+2014-05-16T22:36:21.197+0530 [rsStart] replSet can't get local.system.replset config from self or any seed (EMPTYCONFIG)
+2014-05-16T22:36:21.197+0530 [rsStart] replSet info you may need to run replSetInitiate -- rs.initiate() in the shell -- if that is not already done
+2014-05-16T22:36:21.313+0530 [initandlisten] connection accepted from 127.0.0.1:36649 #1 (1 connection now open)
+2014-05-16T22:36:21.477+0530 [initandlisten] connection accepted from 127.0.0.1:36650 #2 (2 connections now open)
+2014-05-16T22:36:21.479+0530 [conn2] end connection 127.0.0.1:36650 (1 connection now open)
+2014-05-16T22:36:21.479+0530 [initandlisten] connection accepted from 127.0.0.1:36651 #3 (3 connections now open)
+2014-05-16T22:36:21.569+0530 [conn1] end connection 127.0.0.1:36649 (1 connection now open)
+2014-05-16T22:36:21.570+0530 [initandlisten] connection accepted from 127.0.0.1:36652 #4 (3 connections now open)
+2014-05-16T22:36:22.281+0530 [rsStart] trying to contact 127.0.0.1:30001
+2014-05-16T22:36:22.293+0530 [rsStart] trying to contact 127.0.0.1:30003
+2014-05-16T22:36:22.295+0530 [rsStart] replSet I am 127.0.0.1:30002
+2014-05-16T22:36:22.295+0530 [rsStart] replSet got config version 3 from a remote, saving locally
+2014-05-16T22:36:22.296+0530 [rsStart] replSet info saving a newer config version to local.system.replset: { _id: "CorruptionTest", version: 3, members: [ { _id: 0, host: "127.0.0.1:30001" }, { _id: 1, host: "127.0.0.1:30002" }, { _id: 2, host: "127.0.0.1:30003", arbiterOnly: true } ] }
+2014-05-16T22:36:22.315+0530 [rsStart] build index on: local.system.replset properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.system.replset" }
+2014-05-16T22:36:22.315+0530 [rsStart] 	 added index to empty collection
+2014-05-16T22:36:22.316+0530 [rsStart] replSet saveConfigLocally done
+2014-05-16T22:36:22.317+0530 [rsStart] build index on: local.me properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.me" }
+2014-05-16T22:36:22.318+0530 [rsStart] 	 added index to empty collection
+2014-05-16T22:36:22.318+0530 [rsStart] replSet STARTUP2
+2014-05-16T22:36:22.318+0530 [rsSync] ******
+2014-05-16T22:36:22.318+0530 [rsSync] creating replication oplog of size: 128MB...
+2014-05-16T22:36:22.318+0530 [FileAllocator] allocating new datafile mongod-sec/local.1, filling with zeroes...
+2014-05-16T22:36:22.347+0530 [FileAllocator] done allocating datafile mongod-sec/local.1, size: 256MB,  took 0.028 secs
+2014-05-16T22:36:22.480+0530 [rsSync] ******
+2014-05-16T22:36:22.480+0530 [rsSync] replSet initial sync pending
+2014-05-16T22:36:22.480+0530 [rsSync] replSet initial sync need a member to be primary or secondary to do our initial sync
+2014-05-16T22:36:24.296+0530 [rsHealthPoll] replSet member 127.0.0.1:30001 is up
+2014-05-16T22:36:24.296+0530 [rsHealthPoll] replSet member 127.0.0.1:30001 is now in state PRIMARY
+2014-05-16T22:36:24.297+0530 [rsHealthPoll] replSet member 127.0.0.1:30003 is up
+2014-05-16T22:36:24.297+0530 [rsHealthPoll] replSet member 127.0.0.1:30003 is now in state ARBITER
+2014-05-16T22:36:27.482+0530 [conn3] end connection 127.0.0.1:36651 (1 connection now open)
+2014-05-16T22:36:27.482+0530 [initandlisten] connection accepted from 127.0.0.1:36655 #5 (2 connections now open)
+2014-05-16T22:36:27.836+0530 [initandlisten] connection accepted from 127.0.0.1:36656 #6 (3 connections now open)
+2014-05-16T22:36:31.574+0530 [conn4] end connection 127.0.0.1:36652 (2 connections now open)
+2014-05-16T22:36:31.574+0530 [initandlisten] connection accepted from 127.0.0.1:36657 #7 (3 connections now open)
+2014-05-16T22:36:38.480+0530 [rsSync] replSet initial sync pending
+2014-05-16T22:36:38.480+0530 [rsSync] replSet syncing to: 127.0.0.1:30001
+2014-05-16T22:36:38.484+0530 [rsSync] build index on: local.replset.minvalid properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.replset.minvalid" }
+2014-05-16T22:36:38.484+0530 [rsSync] 	 added index to empty collection
+2014-05-16T22:36:38.484+0530 [rsSync] replSet initial sync drop all databases
+2014-05-16T22:36:38.484+0530 [rsSync] dropAllDatabasesExceptLocal 1
+2014-05-16T22:36:38.484+0530 [rsSync] replSet initial sync clone all databases
+2014-05-16T22:36:38.486+0530 [rsSync] replSet initial sync cloning db: testDB
+2014-05-16T22:36:38.563+0530 [FileAllocator] allocating new datafile mongod-sec/testDB.ns, filling with zeroes...
+2014-05-16T22:36:38.602+0530 [FileAllocator] done allocating datafile mongod-sec/testDB.ns, size: 16MB,  took 0.038 secs
+2014-05-16T22:36:38.603+0530 [FileAllocator] allocating new datafile mongod-sec/testDB.0, filling with zeroes...
+2014-05-16T22:36:38.624+0530 [FileAllocator] done allocating datafile mongod-sec/testDB.0, size: 16MB,  took 0.021 secs
+2014-05-16T22:36:39.998+0530 [FileAllocator] allocating new datafile mongod-sec/testDB.1, filling with zeroes...
+2014-05-16T22:36:40.045+0530 [FileAllocator] done allocating datafile mongod-sec/testDB.1, size: 32MB,  took 0.046 secs
+2014-05-16T22:36:40.391+0530 [rsSync] build index on: testDB.testColl properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "testDB.testColl" }
+2014-05-16T22:36:40.405+0530 [rsSync] 	 building index using bulk method
+2014-05-16T22:36:40.709+0530 [rsSync] build index done.  scanned 100000 total records. 0.318 secs
+2014-05-16T22:36:40.714+0530 [rsSync] replSet initial sync cloning db: admin
+2014-05-16T22:36:40.750+0530 [rsSync] replSet initial sync data copy, starting syncup
+2014-05-16T22:36:40.750+0530 [rsSync] oplog sync 1 of 3
+2014-05-16T22:36:40.848+0530 [rsSync] oplog sync 2 of 3
+2014-05-16T22:36:40.848+0530 [rsSync] replSet initial sync building indexes
+2014-05-16T22:36:40.848+0530 [rsSync] replSet initial sync cloning indexes for : testDB
+2014-05-16T22:36:40.870+0530 [rsSync] replSet initial sync cloning indexes for : admin
+2014-05-16T22:36:40.870+0530 [rsSync] oplog sync 3 of 3
+2014-05-16T22:36:40.871+0530 [rsSync] replSet initial sync finishing up
+2014-05-16T22:36:40.958+0530 [rsSync] replSet set minValid=536aac95:1ba5
+2014-05-16T22:36:40.960+0530 [rsSync] replSet RECOVERING
+2014-05-16T22:36:40.960+0530 [rsSync] replSet initial sync done
+2014-05-16T22:36:41.321+0530 [rsBackgroundSync] replSet syncing to: 127.0.0.1:30001
+2014-05-16T22:36:41.322+0530 [rsBackgroundSync] replset setting syncSourceFeedback to 127.0.0.1:30001
+2014-05-16T22:36:41.961+0530 [rsSync] replSet SECONDARY
+2014-05-16T22:36:57.492+0530 [conn5] end connection 127.0.0.1:36655 (2 connections now open)
+2014-05-16T22:36:57.493+0530 [initandlisten] connection accepted from 127.0.0.1:36666 #8 (4 connections now open)
+
+- From above logs: It has recovered, which means it has pulled the data from Primary node. 
+- Test it using the MongProc.
+
+Note: *The .gz files are untouched!!*
