@@ -46,3 +46,9 @@ You will have to shut your system down to do it
 Slower disk I/O[T]
 It's not free[T]
 There are no obvious impacts
+
+9. When is it appropriate to use mongodump for backup?
+For small data sets[T]
+For config servers[T]
+In large production systems - It may take long time for dumping and restoring. It will have significant impact on your system.
+
