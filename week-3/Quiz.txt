@@ -53,4 +53,5 @@ For config servers[T]
 In large production systems - It may take long time for dumping and restoring. It will have significant impact on your system.
 
 10. True or False: You can prevent certain collections from being backed up in MMS? - True
-You need to install a seperate backup agent on your server for this to work. This agent is different from MMS agent. *UGH!* - MMS backup is *not free*. 
+You need to install a seperate backup agent on your server for this to work. This agent is different from MMS agent. *UGH!* - MMS backup is *not free*. Two factor authentication is used for taking backups and the backup data will be stores on MMS hosts. 
+The pricing is based on the amount of space you use for backups.
