@@ -1,7 +1,0 @@
-This problem will be a hands-on implementation of the last problem.
-Files: backupDB.tar.gz, backuptest.tar.gz, mongod,conf
-The backupDB database has one collection, backupColl. At midnight every night, the system is backed up with a mongodump. Your server continued taking writes for a few hours, until 02:46:39. At that point, someone (not you) ran the command:
-
-> db.backupColl.drop()
-Your job is to put your database back into the state it was in immediately before the database was dropped, then use MongoProc to verify that you have done it correctly.
-

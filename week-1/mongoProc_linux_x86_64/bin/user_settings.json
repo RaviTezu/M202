@@ -1,26 +1,17 @@
 {
-    "servers" : {
-
-            "web1": {
-
-                "address": "localhost",
-                "port": "8082"
-            },
-
-            "mongod1": {
-
-                "address": "localhost",
-                "port": "27017"
-
-            }
-    },
-
     "python_loc": "bin/pypy/bin/pypy",
-
-    "proxy": {
-
-        "type": "none",
-        "host": "localhost",
-        "port": 80
+    "servers": {
+        "mongod1": {
+            "address": "localhost",
+            "port": "27017"
+        },
+        "newServer0": {
+            "address": "localhost",
+            "port": "27017"
+        },
+        "web1": {
+            "address": "localhost",
+            "port": "8082"
+        }
     }
 }

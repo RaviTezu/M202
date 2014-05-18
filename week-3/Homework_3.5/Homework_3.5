@@ -1,0 +1,104 @@
+This problem will be a hands-on implementation of the last problem.
+
+The backupDB database has one collection, backupColl. At midnight every night, the system is backed up with a mongodump. Your server continued taking writes for a few hours, until 02:46:39. At that point, someone (not you) ran the command:
+
+> db.backupColl.drop()
+Your job is to put your database back into the state it was in immediately before the database was dropped, then use MongoProc to verify that you have done it correctly.
+You have been provided with a server directory in the backuptest.tar.gz file that includes your (now empty) data files, the mongodump file in backupDB.tar.gz, and a mongod.conf file. The conf file will set the name of your replica set to "BackupTest" and the port to 30001. Your replica set must have these settings to be graded correct in MongoProc. You may configure the host setting for MongoProc if necessary.
+
+Use MongoProc to evaluate your solution. You can verify that your database is in the correct state with the test button and turn it in once you've passed.
+
+This assignment is fairly tricky so you may want to check this stackoverflow question and answer.
+http://stackoverflow.com/questions/15444920/modify-and-replay-mongodb-oplog
+
+You have used 0 of 3 submissions.
+
+Answer:
+==========
+
+- mongo --config mongod.conf -> This starts a mongod replica instance with the backuptest as db path and on port 30001.
+
+- Now connect to it and get the offend operation timestamp: 
+```
+ravitezu@terminator:~$ mongo --port 30001
+MongoDB shell version: 2.6.1
+connecting to: 127.0.0.1:30001/test
+BackupTest:PRIMARY> use local
+switched to db local
+BackupTest:PRIMARY> show collections
+me
+oplog.rs
+startup_log
+system.indexes
+system.replset
+BackupTest:PRIMARY> db.oplog.rs.find({"op":"c"})
+{ "ts" : Timestamp(1398778745, 1), "h" : NumberLong("-4262957146204779874"), "v" : 2, "op" : "c", "ns" : "backupDB.$cmd", "o" : { "drop" : "backupColl" } }
+```
+So, the ts is 1398778745:1 
+
+- Now dump the oplog using the following command: 
+```
+mongodump --port 30001 -d local -c oplog.rs -o oplogD
+connected to: 127.0.0.1:30001
+2014-05-18T13:28:42.578+0530 DATABASE: local	 to 	oplogD/local
+2014-05-18T13:28:42.579+0530 	local.oplog.rs to oplogD/local/oplog.rs.bson
+2014-05-18T13:28:42.965+0530 		 701202 documents
+2014-05-18T13:28:42.965+0530 	Metadata for local.oplog.rs to oplogD/local/oplog.rs.metadata.json
+
+mkdir oplogR
+mv oplogD/local/oplog.rs.bson oplogR/oplog.bson
+```
+- You can also use bsondump on oplogR/oplog.bson for finding the offended operation.
+
+- Now start a new standalone(not replicaset) and do a mongorestore(I'm using standard port and so I didn't give --port): 
+```
+mongorestore --journal backupDB
+connected to: 127.0.0.1
+2014-05-18T13:31:08.165+0530 backupDB/backupColl.bson
+2014-05-18T13:31:08.165+0530 	going into namespace [backupDB.backupColl]
+2014-05-18T13:31:11.106+0530 		Progress: 11547900/55036800	20%	(bytes)
+2014-05-18T13:31:14.049+0530 		Progress: 20911800/55036800	37%	(bytes)
+2014-05-18T13:31:17.114+0530 		Progress: 30921800/55036800	56%	(bytes)
+2014-05-18T13:31:20.369+0530 		Progress: 40977300/55036800	74%	(bytes)
+2014-05-18T13:31:23.059+0530 		Progress: 47656700/55036800	86%	(bytes)
+604800 objects found
+2014-05-18T13:31:25.009+0530 	Creating index: { key: { _id: 1 }, name: "_id_", ns: "backupDB.backupColl" }
+```
+
+- Now replay the oplog on this standalone node: mongorestore --oplogReplay --oplogLimit 1398778745:1 oplogR
+```
+mongorestore --oplogReplay --oplogLimit 1398778745:1 oplogR
+connected to: 127.0.0.1
+2014-05-18T13:31:56.032+0530 	 Replaying oplog
+2014-05-18T13:31:59.014+0530 		Progress: 4876319/113990182	4%	(bytes)
+2014-05-18T13:32:02.012+0530 		Progress: 8901019/113990182	7%	(bytes)
+2014-05-18T13:32:05.006+0530 		Progress: 14094719/113990182	12%	(bytes)
+2014-05-18T13:32:08.010+0530 		Progress: 19355219/113990182	16%	(bytes)
+2014-05-18T13:32:11.006+0530 		Progress: 24164819/113990182	21%	(bytes)
+2014-05-18T13:32:14.009+0530 		Progress: 28657119/113990182	25%	(bytes)
+2014-05-18T13:32:17.008+0530 		Progress: 33182819/113990182	29%	(bytes)
+2014-05-18T13:32:20.006+0530 		Progress: 37574919/113990182	32%	(bytes)
+2014-05-18T13:32:23.009+0530 		Progress: 42050519/113990182	36%	(bytes)
+2014-05-18T13:32:26.010+0530 		Progress: 46258919/113990182	40%	(bytes)
+2014-05-18T13:32:29.007+0530 		Progress: 50484019/113990182	44%	(bytes)
+2014-05-18T13:32:32.011+0530 		Progress: 55193419/113990182	48%	(bytes)
+2014-05-18T13:32:35.006+0530 		Progress: 59719119/113990182	52%	(bytes)
+2014-05-18T13:32:38.014+0530 		Progress: 64144619/113990182	56%	(bytes)
+2014-05-18T13:32:41.014+0530 		Progress: 68453219/113990182	60%	(bytes)
+2014-05-18T13:32:44.011+0530 		Progress: 72928819/113990182	63%	(bytes)
+2014-05-18T13:32:47.013+0530 		Progress: 77487919/113990182	67%	(bytes)
+2014-05-18T13:32:50.011+0530 		Progress: 82998919/113990182	72%	(bytes)
+2014-05-18T13:32:53.011+0530 		Progress: 87741719/113990182	76%	(bytes)
+2014-05-18T13:32:56.007+0530 		Progress: 91883319/113990182	80%	(bytes)
+2014-05-18T13:32:59.014+0530 		Progress: 96809819/113990182	84%	(bytes)
+2014-05-18T13:33:02.027+0530 		Progress: 101407655/113990182	88%	(bytes)
+2014-05-18T13:33:05.007+0530 		Progress: 104459955/113990182	91%	(bytes)
+2014-05-18T13:33:08.019+0530 		Progress: 107656355/113990182	94%	(bytes)
+2014-05-18T13:33:11.014+0530 		Progress: 110616955/113990182	97%	(bytes)
+2014-05-18T13:33:14.005+0530 		Progress: 113589119/113990182	99%	(bytes)
+701202 objects found
+2014-05-18T13:33:14.354+0530 Applied 701200 oplog entries out of 701201 (1 skipped).
+``` 
+
+- Now run the MongoProc against this node or make this standalone run on 30001 as the MongoProc checks on this port for validating your answer. 
+

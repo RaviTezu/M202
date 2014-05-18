@@ -6,5 +6,8 @@ Which of the following are steps you should take in order for this to be success
 The writes that occurred before the backup will cause problems if replayed, because they will cause the database to deviate from the state it was in before the mongodump, so they need to be excised from the replay.
 The mongodump will be repeated when the oplog is replayed, potentially overwriting the original mongodump, so that operation needs to be removed from the oplog.
 The writes after the mongodump will need to be sorted, as they may not be in order.
-The db.collection.drop() command will still be in the oplog, and will need to be avoided.
-Ensure that any writes that occurred after the drop() command are not replayed (you might need to deal with these later), because these might lead to unexpected or inconsistent results.
+The db.collection.drop() command will still be in the oplog, and will need to be avoided.[T]
+Ensure that any writes that occurred after the drop() command are not replayed (you might need to deal with these later), because these might lead to unexpected or inconsistent results.[T]
+
+I got this wrong, and So, the answers are expected to be correct. 
+
