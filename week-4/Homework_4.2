@@ -1,0 +1,38 @@
+Homework: 4.2: Optimizing a secondary for special case reads
+
+Suppose you have an application on which you want to run analytics monthly. The analytics require an index and for performance reasons you will create the index on a secondary. Initiate a replica set with a primary and only one secondary. Create an index on the secondary only. The index should be on the "a" field of the "testDB.testColl" collection.
+
+When you have created the index on the secondary, test with MongoProc to be sure you've completed the problem correctly and then submit.
+
+Note: If you have any documents in the testDB.testColl collection when you test or submit with MongoProc they will be removed.
+
+Answer: 
+=======
+
+- You can make use of week-3 - 3.1 mongod-{pri,sec,arb} db directories for setting up a RS. 
+Primary:
+mongod --port 30001 --dbpath mongod-pri --replSet CorruptionTest --smallfiles --oplogSize 128
+Secondary
+mongod --port 30002 --dbpath mongod-sec --replSet CorruptionTest --smallfiles --oplogSize 128
+Arbiter
+mongod --port 30003 --dbpath mongod-arb --replSet CorruptionTest
+
+- Now loging to PRIMARY SHELL and drop the testColl collection. mongo --port 30001 > use testDB > db.testColl.drop() or you can delete all the docs in the collection.
+
+- Now insert some doc to the same colletion with "a field in the docs": 
+  db.testColl.insert({"a":"Ravi"})
+  db.testColl.insert({"a":"Teja"})
+  db.testColl.insert({"a":"RaviTezu"})
+  db.testColl.insert({"a":"Tezu"})
+
+- As you've 3 nodes(P,S & A), now takedown the SECONDARY node(Make sure you have the above 4 docs in the testDB.testColl). mongo --port 30002 > use admin > db.shutdownServer(). 
+
+- Now the start the secondary in standalone mode: mongod --port 30002 --dbpath mongod-sec
+
+- Now the connect to this standalone node(which is running on 30002) and create a index on the "a" field: mongo --port 30002 > use testDB > db.testColl.ensureIndex({"a":1})
+
+- Now shutdown this standalone node and add it back to ReplicaSet: use admin > db.shutdownServer()
+
+- Adding back to RS: mongod --port 30002 --dbpath mongod-sec --replSet CorruptionTest --smallfiles --oplogSize 128
+
+- Done, Make sure your MongoProc checks on 30001 port. 
