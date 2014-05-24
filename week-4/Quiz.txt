@@ -1,2 +1,9 @@
 Week-4 Quiz Questions:
 =======================
+1. Which of the following are considered part of best practices when doing rolling maintenance on a replica set? Check all that apply.
+
+Perform maintenance on one secondary at a time.[T]
+Ensure your replica set has a minimum of three data-bearing secondaries.
+Shut down a secondary and restart it without --replSet to perform maintenance.[T]
+Restart secondaries on a different port when performing maintenance.[T]
+None of the above. MongoDB does not recommend rolling maintenance.
