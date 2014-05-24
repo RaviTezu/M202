@@ -39,3 +39,14 @@ Client
 30,000
 40,000
 There is no limit[T] - Prior to MongoDB 2.6, the upper limit for maxIncomingConnections for a mongod or mongos was 20,000. Starting with MongoDB 2.6, this is no longer the case. There is no longer an upper limit on what value you can choose as your maxIncomingConnections. http://docs.mongodb.org/manual/reference/configuration-options/#net.maxIncomingConnections
+
+Note: For calculating max. number of mongos connections = maxPrimaryConnections - (numSecondarynodesinaRS * 3) - (numOthernodes *3) // numMongos
+maxPrimaryConnections - are limited by ulimit, memory, caps. 
+
+6. Which of the following are true of automatic rollback? Check all that apply.
+
+Automatic rollback occurs only if rollback is less than 300MB.[T]
+Manual intervention is always required to restore the data.[T]
+Rollback can't occur if w="majority".
+
+
