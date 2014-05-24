@@ -3,7 +3,15 @@ Week-4 Quiz Questions:
 1. Which of the following are considered part of best practices when doing rolling maintenance on a replica set? Check all that apply.
 
 Perform maintenance on one secondary at a time.[T]
-Ensure your replica set has a minimum of three data-bearing secondaries.
+Ensure your replica set has a minimum of three data-bearing secondaries.[2 Secondaries are recommended]
 Shut down a secondary and restart it without --replSet to perform maintenance.[T]
 Restart secondaries on a different port when performing maintenance.[T]
 None of the above. MongoDB does not recommend rolling maintenance.
+
+2. Suppose your application is making use of a cursor to read a large amount of data from a sharded cluster. The mongos your application is talking to goes down and the application connects to another mongos. Which of the following will occur?
+
+The new mongos will continue to use the same cursor seamlessly.
+The cursor will be lost and an exception will be raised.[T]
+The cursor will be reset, and the query will start over at the beginning of the result set when getmore is called next.
+The cursor will skip one getmore call, so some documents in the result set will be skipped.
+The cursor will behave as if it reached the end of the result set.
