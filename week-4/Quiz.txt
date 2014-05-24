@@ -15,3 +15,11 @@ The cursor will be lost and an exception will be raised.[T]
 The cursor will be reset, and the query will start over at the beginning of the result set when getmore is called next.
 The cursor will skip one getmore call, so some documents in the result set will be skipped.
 The cursor will behave as if it reached the end of the result set.
+
+3. Which of the following are types of connections you might find in a replica set? Check all that apply.
+
+Heartbeat connections between members
+Connections from secondaries to their sync source in order to tail the oplog.
+Connections from secondaries to their sync source to keep track of where they are in the oplog
+Administrative connections from drivers to all members
+Connections from clients reading from secondaries - All are True
