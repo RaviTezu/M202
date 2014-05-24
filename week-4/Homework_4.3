@@ -1,0 +1,41 @@
+In this problem, you will be causing a rollback scenario. Set up a replica set with one primary, one secondary, and an arbiter. Write some data to the primary in such a way that it does not replicate on the secondary (perhaps by taking down the secondary) then remove the primary from the replica set. Let the secondary come back up and become primary, write to it, and then bring up the original primary (it will now be a secondary).
+
+Once you've triggered the rollback scenario, please submit your work using MongoProc. You do not need to reload the data lost during rollback. For your solution to be graded correct, you must have one secondary in the replica set on which rollback has occurred. Please launch your mongods using absolute pathnames as values for the --dbpath parameter or MongoProc will not be able to determine whether you have complete the assignment correctly.
+
+Adam wrote a tutorial blog post on simulating rollback. It might be a little outdated, but provides a detailed discussion of this topic and is worth the read.
+
+Answer: 
+=======
+Note: I've attached the tutorial blog post here as a pdf format file. 
+
+- As the previous HW use the same HW3.1 for setting up a ReplicaSet. 
+
+- Now login to PRIMARY and start inserting the data: for(var i = 0; i <= 1000000 ; i++){db.rollback.insert({"a" : i}); sleep(100);}
+
+- Now you have to break the replication: kill -SIGSTOP <PID of Mongod running on 30002>
+
+- Wait for a minute and now you have to force kill the current PRIMARY(where are writes are still going on): kill -SIGINT <PID of Mongod running on 30001>; kill -SIGCONT <PID of Mongod running on 30002>
+
+- Above command will kill the PRIMARY and will allow the Secondary node to continue. So, the SECONDARY node running on 30002 will be promted as PRIMARY now and the write which have happend while the SECONDARY node was stopped should be rolled back when we add the PRIMARY node(which runs on 30001) back to the set and it will be added as a SECONDARY node. 
+
+- To add it back to the ReplicaSet:
+*Note:* MongoProc has some bug here and you need to mention the absolute pathname for --dbpath. 
+mongod --port 30001 --dbpath /tmp/mongod-pri --replSet CorruptionTest --smallfiles --oplogSize 128 - I have the db directory in /tmp and so --dbpath for this node is /tmp/mongod-pri. 
+ravitezu@terminator:/tmp$ ls -lrt /tmp/mongod-pri
+total 458768
+-rw------- 1  501 staff  67108864 May  8 03:29 testDB.2
+-rw------- 1  501 staff  33554432 May 24 23:22 testDB.1
+-rw------- 1  501 staff  16777216 May 24 23:32 testDB.ns
+-rw------- 1  501 staff  16777216 May 24 23:32 testDB.0
+drwxr-xr-x 2 root root       4096 May 24 23:41 rollback
+-rw------- 1 root root   16777216 May 24 23:41 test.ns
+-rw------- 1 root root   16777216 May 24 23:41 test.0
+-rw------- 1  501 staff 268435456 May 24 23:41 local.1
+-rw------- 1  501 staff  16777216 May 24 23:43 local.ns
+-rw------- 1  501 staff  16777216 May 24 23:43 local.0
+drwxr-xr-x 2  501 staff      4096 May 24 23:45 journal
+-rwxr-xr-x 1  501 staff         0 May 24 23:45 mongod.lock
+
+- You can see the rollback directory here. which is nothing but the bsondump of the writes which had happened while the SECONDARY(which is not PRIMARY) is down. You can restore this dump using the mongorestore command. 
+
+
