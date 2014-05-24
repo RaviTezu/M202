@@ -31,3 +31,11 @@ Config server
 Primary[T]
 Secondary
 Client
+
+5. In mongodb 2.6, what is the hard limit on the maximum number of connections that a server can have?
+
+10,000
+20,000
+30,000
+40,000
+There is no limit[T] - Prior to MongoDB 2.6, the upper limit for maxIncomingConnections for a mongod or mongos was 20,000. Starting with MongoDB 2.6, this is no longer the case. There is no longer an upper limit on what value you can choose as your maxIncomingConnections. http://docs.mongodb.org/manual/reference/configuration-options/#net.maxIncomingConnections
