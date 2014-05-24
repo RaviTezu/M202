@@ -23,3 +23,11 @@ Connections from secondaries to their sync source in order to tail the oplog.
 Connections from secondaries to their sync source to keep track of where they are in the oplog
 Administrative connections from drivers to all members
 Connections from clients reading from secondaries - All are True
+
+4. Suppose you have an application backed by a sharded cluster. Each shard is a three-node replica set in which all nodes are data bearing. Your application is at 80% utilization for the maximum number of connections. Which type of process is the bottleneck in this scenario?
+
+Mongos
+Config server
+Primary[T]
+Secondary
+Client
