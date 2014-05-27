@@ -1,0 +1,8 @@
+Which of the following are essential questions to answer in planning a strategy for scaling out with shards? Check all that apply.
+
+What tolerance do I have for data loss?
+By what factors should I measure the capacity of my system?[T]
+How many shards do I need to add to keep my capacity under 80%?[]
+What is the age of my existing infrastructure and should I consider updating to more reliable hardware?
+What growth trend does my application follow along my primary capacity metric?[T]
+
