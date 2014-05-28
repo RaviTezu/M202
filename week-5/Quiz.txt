@@ -1,4 +1,4 @@
-Which of the following are essential questions to answer in planning a strategy for scaling out with shards? Check all that apply.
+1. Which of the following are essential questions to answer in planning a strategy for scaling out with shards? Check all that apply.
 
 What tolerance do I have for data loss?
 By what factors should I measure the capacity of my system?[T]
@@ -6,3 +6,10 @@ How many shards do I need to add to keep my capacity under 80%?[T]
 What is the age of my existing infrastructure and should I consider updating to more reliable hardware?
 What growth trend does my application follow along my primary capacity metric?[T]
 
+2. Which of the following accurately describe config servers in a sharded cluster? Check all that apply.
+
+You can consider config servers to be identical with regard to the data they contain.[T]
+The configure servers form a replica set.[They are not a Replica set]
+Requests from mongos processes are distributed across the config servers.[Nothing is used, mongos hosts hit on first configdb hosts for meta data, if this 1st configdb host goes down then they hit on second host, however the other configdbs takes only reads. No writes will happend when one of the configdb hosts are down. No chuck migrations will occur during this time]
+Config servers are critical to the health of your sharded cluster.[T]
+Config servers provide automatic failover such that if one goes down, meta-data updates can continue.
