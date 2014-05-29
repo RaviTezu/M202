@@ -13,3 +13,8 @@ The configure servers form a replica set.[They are not a Replica set, they do no
 Requests from mongos processes are distributed across the config servers.[Nothing is used, mongos hosts hit on first configdb hosts for meta data, if this 1st configdb host goes down then they hit on second host, however the other configdbs takes only reads. No writes will happend when one of the configdb hosts are down. No chuck migrations will occur during this time]
 Config servers are critical to the health of your sharded cluster.[T]
 Config servers provide automatic failover such that if one goes down, meta-data updates can continue.
+
+3. True or false? When upgrading from MongoDB 2.4 to 2.6 there is a strict order in which you must upgrade the mongod, mongos, and config servers. (Note: there is a homework on this subject at the end of this chapter.)
+
+True[T]
+False
