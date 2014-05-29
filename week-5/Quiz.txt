@@ -18,3 +18,11 @@ Config servers provide automatic failover such that if one goes down, meta-data 
 
 True[T]
 False
+
+4. Which of the following are services a mongos performs? Check all that apply.
+
+Coordinates the process of keeping shards balanced[T]
+Provides an abstraction layer that frees clients from a need to know how the data is sharded[T]
+Maintains all cluster meta data
+Merges results from individual shards for queries involving sort()[T]
+Maintains indexes for shard keys
