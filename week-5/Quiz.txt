@@ -26,3 +26,11 @@ Provides an abstraction layer that frees clients from a need to know how the dat
 Maintains all cluster meta data
 Merges results from individual shards for queries involving sort()[T]
 Maintains indexes for shard keys
+
+5. Which of the following occur when a chunk is split?
+
+A small split token is placed in the data file
+The data file is turned into two files, but they are at the same location as they were before
+A split alters meta data only, there is no change to the data itself[T]
+The data file is split in two and possibly moved
+A new chunk is created and new writes go to the new chunk
