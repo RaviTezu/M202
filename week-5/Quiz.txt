@@ -34,3 +34,11 @@ The data file is turned into two files, but they are at the same location as the
 A split alters meta data only, there is no change to the data itself[T]
 The data file is split in two and possibly moved
 A new chunk is created and new writes go to the new chunk
+
+6. Which of the following is the most likely cause of MongoDB marking a chunk as jumbo?
+
+The balancer is not running
+Too many large documents in your collection
+Too few shards
+A shard key with a cardinality that is too low[T]
+Too many documents in the collection
