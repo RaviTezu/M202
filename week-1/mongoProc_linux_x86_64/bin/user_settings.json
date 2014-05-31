@@ -3,7 +3,7 @@
     "servers": {
         "mongod1": {
             "address": "localhost",
-            "port": "30001"
+            "port": "27099"
         },
         "newServer0": {
             "address": "localhost",

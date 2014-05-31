@@ -1,0 +1,50 @@
+Answer:
+=======
+
+
+1. Start configdb server(s) using the following command:
+   mongod --configsvr --dbpath /data/configdb --port 27019
+
+2. Start a mongos instance:
+   mongos --configdb terminator:27019 --port 27099
+
+3. Start 3 mongod instances with the following commands:
+   mongod --port 27031 --dbpath=/data/db
+   mongod --port 27032 --dbpath=/data/db1
+   mongod --port 27033 --dbpath=/data/db2
+
+4. Once this is done, You should have 4 mongo processes running on your machine. 
+
+5. Now we need to set the 3 mongod instaces(3 shards) as a cluster, go to the mongos shell:
+   mongos --port 27099
+   mongos> db.adminCommand({addShard: "terminator:27031", "name":"shard0"})
+   mongos> db.adminCommand({addShard: "terminator:27032", "name":"shard1"})
+   mongos> db.adminCommand({addShard: "terminator:27033", "name":"shard2"})
+   Don't sweat much what "terminator" is here, it is my host name. 
+
+6. Before doing anything to cluster, we should stop the balancer to avoid automatic chunk migrations:
+   mongos> sh.stopBalancer()
+   mongos> sh.getBalancerState() //should say false here
+
+7. Now we need to create a db m202 with presplit collection in it:
+   mongos> use m202
+   mongos> db.createCollection("presplit")
+
+8. Now we need to enable sharding on m202 db and shard the Collections using the "a" as shard key:
+   mongos> sh.enableSharding("m202")
+   mongos> sh.shardCollection("m202.presplit",{"a":1})
+
+9. Now you need to create chunks:
+   mongos> for ( var x=0; x<25; x++ ){ db.adminCommand({ split : "m202.presplit" , middle : { a : x } }) 
+   Above command will create 26 chunks on shard0 as its primary.
+
+10. sh.status() will show you the chunks under the m202 database.
+
+11. Inoder to move the chunks from one shard to other shard, You can use the following command:
+    db.adminCommand( { moveChunk : "m202.presplit", find : {a:14}, to : "terminator:27032"}) 
+    I've moved the chunks first according to the question and we need to merge these chunks here according to the ranges.
+
+12. For merging: 
+    db.adminCommand( { mergeChunks: "m202.presplit", bounds: [ { "a":0},{"a":2} ] })
+    Above command will merge the a:0 --> a:1 and a:1 --> a:2 chunks. 
+    So, use the above command accordingly to get the ranges as per the question and sometimes you may need to move the chunks again. 
