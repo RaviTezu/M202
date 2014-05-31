@@ -22,4 +22,78 @@ Without turning on your balancer, adding/removing documents, or otherwise modify
 
 In order to see the problem, look for the document with _id: 90001. Each shard will have its own copy, and the mongos will look for it on the wrong shard. When you get a new value for the "string" field (one that doesn't end with lots of 0's), you've completed the problem.
 
+Answer:
+=======
+1. You need to run the give command to put up the required instaces. You have to give it a couple of minutes to complete and make sure you have all the instaces up and running. 
 
+2. ravitezu@terminator:~ ps -aef | grep -i mongo
+mongodb    970     1  0 19:42 ?        00:00:35 /usr/bin/mongod --config /etc/mongod.conf
+root      5693  2566  0 21:09 pts/0    00:00:00 sudo mongo --nodb
+root      5694  5693  0 21:09 pts/0    00:00:01 mongo --nodb
+root      5697  5694  1 21:09 pts/0    00:00:03 mongod --oplogSize 40 --port 31100 --noprealloc --smallfiles --rest --replSet test-rs0 --dbpath /data/db/test-rs0-0 --setParameter enableTestCommands=1
+root      5800  5694  1 21:09 pts/0    00:00:03 mongod --oplogSize 40 --port 31101 --noprealloc --smallfiles --rest --replSet test-rs0 --dbpath /data/db/test-rs0-1 --setParameter enableTestCommands=1
+root      5966  5694  1 21:10 pts/0    00:00:03 mongod --oplogSize 1 --port 31102 --noprealloc --smallfiles --rest --replSet test-rs0 --dbpath /data/db/test-rs0-2 --setParameter enableTestCommands=1
+root      6171  5694  1 21:10 pts/0    00:00:03 mongod --oplogSize 40 --port 31200 --noprealloc --smallfiles --rest --replSet test-rs1 --dbpath /data/db/test-rs1-0 --setParameter enableTestCommands=1
+root      6334  5694  1 21:10 pts/0    00:00:02 mongod --oplogSize 40 --port 31201 --noprealloc --smallfiles --rest --replSet test-rs1 --dbpath /data/db/test-rs1-1 --setParameter enableTestCommands=1
+root      6507  5694  1 21:11 pts/0    00:00:02 mongod --oplogSize 1 --port 31202 --noprealloc --smallfiles --rest --replSet test-rs1 --dbpath /data/db/test-rs1-2 --setParameter enableTestCommands=1
+root      6713  5694  1 21:11 pts/0    00:00:01 mongod --port 29000 --dbpath /data/db/test-config0 --configsvr --setParameter enableTestCommands=1
+root      6831  5694  0 21:12 pts/0    00:00:00 mongos --port 30999 --configdb terminator:29000 --chunkSize 1 --setParameter enableTestCommands=1
+root      7127  7091  0 21:13 pts/14   00:00:00 /bin/sh ./mongoProc.sh
+root      7132  7127  1 21:13 pts/14   00:00:00 /home/ravitezu/git-hub/M202/week-1/mongoProc_linux_x86_64/./bin/mongoProc
+ravitezu  7232  7171  0 21:14 pts/16   00:00:00 grep --color=auto -i mongo
+
+3. As all the intances are up and running, now connect to mongos shell and all you need to do is flush the mongos cache :)
+ravitezu@terminator:~ mongo --port 30999
+MongoDB shell version: 2.6.1
+connecting to: 127.0.0.1:30999/test
+mongos> sh.status()
+--- Sharding Status --- 
+  sharding version: {
+	"_id" : 1,
+	"version" : 4,
+	"minCompatibleVersion" : 4,
+	"currentVersion" : 5,
+	"clusterId" : ObjectId("5389f84a8be41ada8f1594e3")
+}
+  shards:
+	{  "_id" : "test-rs0",  "host" : "test-rs0/terminator:31100,terminator:31101" }
+	{  "_id" : "test-rs1",  "host" : "test-rs1/terminator:31200,terminator:31201" }
+  databases:
+	{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+	{  "_id" : "testDB",  "partitioned" : true,  "primary" : "test-rs0" }
+		testDB.testColl
+			shard key: { "_id" : 1 }
+			chunks:
+				test-rs1	12
+				test-rs0	9
+			too many chunks to print, use verbose if you want to force print
+
+mongos> show dbs
+admin   (empty)
+config  0.016GB
+testDB  0.063GB
+mongos> use testDB
+switched to db testDB
+mongos> show collections
+system.indexes
+testColl
+mongos> db.testColl.find({"_id": 90001})
+{ "_id" : 90001, "otherID" : ObjectId("5389f8fa9a85db1c5827f5dc"), "string" : "testStringForPadding0000000000000000000000000000000000000000" }
+mongos> 
+mongos> 
+mongos> use admin
+switched to db admin
+mongos> db.f
+db.forceError(   db.fsyncLock(    db.fsyncUnlock(
+mongos> sh.
+sh.addShard(              sh.disableBalancing(      sh.isBalancerRunning(     sh.splitAt(               sh.valueOf(
+sh.addShardTag(           sh.enableBalancing(       sh.moveChunk(             sh.splitFind(             sh.waitForBalancer(
+sh.addTagRange(           sh.enableSharding(        sh.propertyIsEnumerable(  sh.startBalancer(         sh.waitForBalancerOff(
+sh.apply(                 sh.getBalancerHost(       sh.prototype              sh.status(                sh.waitForDLock(
+sh.bind(                  sh.getBalancerState(      sh.removeShardTag(        sh.stopBalancer(          sh.waitForPingChange(
+sh.call(                  sh.hasOwnProperty(        sh.setBalancerState(      sh.toLocaleString(
+sh.constructor            sh.help(                  sh.shardCollection(       sh.toString(
+mongos> db.adminCommand({flushRouterConfig:1})
+{ "flushed" : true, "ok" : 1 }
+mongos> db.testColl.find({"_id": 90001})
+bye
