@@ -48,3 +48,40 @@ Answer:
     db.adminCommand( { mergeChunks: "m202.presplit", bounds: [ { "a":0},{"a":2} ] })
     Above command will merge the a:0 --> a:1 and a:1 --> a:2 chunks. 
     So, use the above command accordingly to get the ranges as per the question and sometimes you may need to move the chunks again. 
+
+mongos> sh.status(true)
+--- Sharding Status --- 
+  sharding version: {
+	"_id" : 1,
+	"version" : 4,
+	"minCompatibleVersion" : 4,
+	"currentVersion" : 5,
+	"clusterId" : ObjectId("53899ab5505ac666aae1e316")
+}
+  shards:
+	{  "_id" : "shard0",  "host" : "terminator:27031" }
+	{  "_id" : "shard1",  "host" : "terminator:27032" }
+	{  "_id" : "shard2",  "host" : "terminator:27033" }
+  databases:
+	{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+	{  "_id" : "m202",  "partitioned" : true,  "primary" : "shard0" }
+		m202.presplit
+			shard key: { "a" : 1 }
+			chunks:
+				shard0	4
+				shard1	3
+				shard2	4
+			{ "a" : { "$minKey" : 1 } } -->> { "a" : 0 } on : shard0 Timestamp(18, 1) 
+			{ "a" : 0 } -->> { "a" : 7 } on : shard0 Timestamp(20, 7) 
+			{ "a" : 7 } -->> { "a" : 10 } on : shard0 Timestamp(20, 9) 
+			{ "a" : 10 } -->> { "a" : 14 } on : shard0 Timestamp(20, 12) 
+			{ "a" : 14 } -->> { "a" : 15 } on : shard1 Timestamp(20, 1) 
+			{ "a" : 15 } -->> { "a" : 20 } on : shard1 Timestamp(20, 16) 
+			{ "a" : 20 } -->> { "a" : 21 } on : shard1 Timestamp(15, 0) 
+			{ "a" : 21 } -->> { "a" : 22 } on : shard2 Timestamp(20, 0) 
+			{ "a" : 22 } -->> { "a" : 23 } on : shard2 Timestamp(17, 0) 
+			{ "a" : 23 } -->> { "a" : 24 } on : shard2 Timestamp(18, 0) 
+			{ "a" : 24 } -->> { "a" : { "$maxKey" : 1 } } on : shard2 Timestamp(19, 0) 
+
+mongos> 
+
