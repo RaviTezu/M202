@@ -67,3 +67,9 @@ Answers:
 { "email" : "bb" } -->> { "email" : "bc" } on : shard0001[T]
 { "email" : "db" } -->> { "email" : "dc" } on : shard0003
 { "email" : "ee" } -->> { "email" : { "$maxKey" : 1 } } on : shard0001
+
+3. Anatomy of a migration overview
+
+Get a little practice reading log information on chunk migrations. Spin up a sharded cluster using the shardingTest() helper. Shard a collection across this cluster and create 20 or more chunks. Then look at the config.changelog collection to see how the chunks were moved from one shard to another during balancing.
+
+As values for the "what" field for documents in this collection you will see, "moveChunk.start", "moveChunk.to", and "moveChunk.from". You will also see one other value for the "what" field related to moveChunk operations. What is that value? Please enter the value exactly as it appears in config.changelog documents. Include the double quotes surrounding the value in your answer. - "moveChunk.commit" 
