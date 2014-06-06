@@ -1,0 +1,7 @@
+1. When does the balancer kick in?
+
+A-D below represent four different sharded cluster scenarios. Assuming you are running MongoDB 2.2 or greater, in which of the following scenarios would you expect there to be at least one balancing round to adjust the distribution of chunks across the shards? A is not one of them, by the way, and Adam uses this as a springboard into a little diagnosis in the solution.[See the attached Pic]
+A
+B[T] - Less than 20 chunks and difference between them > 2
+C
+D[T] - More then 80 chunks and difference between them > 8
