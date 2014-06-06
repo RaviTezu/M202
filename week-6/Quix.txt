@@ -5,3 +5,65 @@ A[F] - Total chunks are equal to 20 and difference should be 4 and so no migrati
 B[T] - Less than 20 chunks and difference between them > 2
 C[F] - Mote than 80 chunks are difference should be 8 not 3 and so no migrations will happen.
 D[T] - More then 80 chunks and difference between them > 8
+
+2. How does the balancer pick chunks?
+
+Suppose the output below reflects a sharded cluster you are working with. Based on the lesson, which chunk will be selected for migration during the next balancing round?
+mongos> sh.status({verbose : 1})
+--- Sharding Status --- 
+sharding version: {
+  "_id" : 1,
+  "version" : 4,
+  "minCompatibleVersion" : 4,
+  "currentVersion" : 5,
+  "clusterId" : ObjectId("538b744619782a0df0966b77")
+}
+shards:
+  {  "_id" : "shard0000",  "host" : "localhost:30000" }
+  {  "_id" : "shard0001",  "host" : "localhost:30001" }
+  {  "_id" : "shard0002",  "host" : "localhost:30002" }
+  {  "_id" : "shard0003",  "host" : "localhost:30003" }
+databases:
+  {  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+  {  "_id" : "myapp",  "partitioned" : true,  "primary" : "shard0001" }
+    myapp.users
+      shard key: { "email" : 1 }
+      chunks:
+        shard0000  6
+        shard0002  5
+        shard0003  6
+        shard0001  9
+      { "email" : { "$minKey" : 1 } } -->> { "email" : "aa" } on : shard0000 Timestamp(2, 0) 
+      { "email" : "aa" } -->> { "email" : "ab" } on : shard0002 Timestamp(3, 0) 
+      { "email" : "ab" } -->> { "email" : "ac" } on : shard0003 Timestamp(4, 0) 
+      { "email" : "ac" } -->> { "email" : "ad" } on : shard0000 Timestamp(5, 0) 
+      { "email" : "ad" } -->> { "email" : "ae" } on : shard0002 Timestamp(6, 0) 
+      { "email" : "ae" } -->> { "email" : "ba" } on : shard0003 Timestamp(7, 0) 
+      { "email" : "ba" } -->> { "email" : "bb" } on : shard0000 Timestamp(8, 0) 
+      { "email" : "bb" } -->> { "email" : "bc" } on : shard0001 Timestamp(9, 0) 
+      { "email" : "bc" } -->> { "email" : "bd" } on : shard0003 Timestamp(10, 0) 
+      { "email" : "bd" } -->> { "email" : "be" } on : shard0001 Timestamp(11, 0) 
+      { "email" : "be" } -->> { "email" : "ca" } on : shard0002 Timestamp(12, 0) 
+      { "email" : "ca" } -->> { "email" : "cb" } on : shard0003 Timestamp(13, 0) 
+      { "email" : "cb" } -->> { "email" : "cc" } on : shard0000 Timestamp(14, 0) 
+      { "email" : "cc" } -->> { "email" : "cd" } on : shard0002 Timestamp(15, 0) 
+      { "email" : "cd" } -->> { "email" : "ce" } on : shard0003 Timestamp(16, 0) 
+      { "email" : "ce" } -->> { "email" : "da" } on : shard0000 Timestamp(17, 0) 
+      { "email" : "da" } -->> { "email" : "db" } on : shard0002 Timestamp(18, 0) 
+      { "email" : "db" } -->> { "email" : "dc" } on : shard0003 Timestamp(19, 0) 
+      { "email" : "dc" } -->> { "email" : "dd" } on : shard0000 Timestamp(20, 0) 
+      { "email" : "dd" } -->> { "email" : "de" } on : shard0001 Timestamp(20, 1) 
+      { "email" : "de" } -->> { "email" : "ea" } on : shard0001 Timestamp(1, 41) 
+      { "email" : "ea" } -->> { "email" : "eb" } on : shard0001 Timestamp(1, 43) 
+      { "email" : "eb" } -->> { "email" : "ec" } on : shard0001 Timestamp(1, 45) 
+      { "email" : "ec" } -->> { "email" : "ed" } on : shard0001 Timestamp(1, 47) 
+      { "email" : "ed" } -->> { "email" : "ee" } on : shard0001 Timestamp(1, 49) 
+      { "email" : "ee" } -->> { "email" : { "$maxKey" : 1 } } on : shard0001 Timestamp(1, 50) 
+
+There should be migration from shard0001 to shard0002 and the chunk with lowest range:
+Answers:
+{ "email" : { "$minKey" : 1 } } -->> { "email" : "aa" } on : shard0000
+{ "email" : "aa" } -->> { "email" : "ab" } on : shard0002
+{ "email" : "bb" } -->> { "email" : "bc" } on : shard0001[T]
+{ "email" : "db" } -->> { "email" : "dc" } on : shard0003
+{ "email" : "ee" } -->> { "email" : { "$maxKey" : 1 } } on : shard0001
