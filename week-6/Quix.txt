@@ -123,3 +123,11 @@ In write-heavy applications[T]
 In read-heavy applications
 In systems distributed across hardware with varying levels of performance
 If the common query patterns in an application select documents based on multiple fields
+
+7. Unbalanced chunks overview: Consider the diagram below depicting the distribution of chunks across a sharded cluster. For each chunk, the number (16, 32, or 64) defines the size of the chunk in MB. Assuming no new chunks are created, which of the following best describes what actions the balancer will take during the next balancing round? [See attached pic - unbalanced_chunks_quiz.png]
+
+The shards are balanced. There will not be a balancing round until more chunks are created.
+The balancer will migrate a chunk from shard 1 to shard 2.
+The balancer will migrate a chunk from shard 2 to shard 3.[T] - Total chunk are 13, migrations happen from more chunks shard to lower chunks shard, when there's a difference of more than 2 # of chunks.
+The balancer will migrate a chunk from shard 3 to shard 1.
+The balancer will migrate a chunk from shard 1 to shard 3.
