@@ -1,0 +1,55 @@
+Homework: 6.2 Traffic Imbalance in a Sharded Environment
+
+In this problem, you have a cluster with 2 shards, each with a similar volume of data, but all the application traffic is going to one shard. You must diagnose the query pattern that is causing this problem and figure out how to balance out the traffic.
+
+To set up the scenario, run the following commands to set up your cluster. The config document passed to ShardingTest will eliminate the disk space issues some students have seen when using ShardingTest.
+
+$ mongo --nodb
+> config = { d0 : { smallfiles : "", noprealloc : "", nopreallocj : ""}, d1 : { smallfiles : "", noprealloc : "", nopreallocj : "" } };
+> cluster = new ShardingTest( { shards: config } );
+Once the cluster is up, click "Initialize" in MongoProc one time to finish setting up the cluster's data and configuration. If you are running MongoProc on a machine other than the one running the mongos, then you must change the host of 'mongod1' in the settings. The host should be the hostname or IP of the machine on which the mongos is running. MongoProc will use port 30999 to connect to the mongos for this problem.
+
+Once the cluster is initialized, click the "Initialize" button in MongoProc again to simulate application traffic to the cluster for 1 minute. You may click "Initialize" as many times as you like to simulate more traffic for 1 minute at a time. If you need to begin the problem again and want MongoProc to reinitialize the dataset, drop the week6 database from the cluster and click "Initialize" in MongoProc.
+
+Use diagnostic tools (e.g., mongostat and the database profiler) to determine why all application traffic is being routed to one shard. Once you believe you have fixed the problem and traffic is balanced evenly between the two shards, test using MongoProc and then turn in if the test completes successfully.
+
+Answer: 
+targeted=======
+I just Hacked it, I'm not sure about this!
+
+1. Enabled the profiling on both the shards and I saw only shard0000 is receving the traffic and queries are tageted at date:
+> db.system.profile.find().sort({"ts":-1})
+{ "op" : "update", "ns" : "week6.m202", "query" : { "_id" : { "$gte" : ISODate("2014-07-13T00:00:00Z"), "$lt" : ISODate("2014-07-19T00:00:00Z") } }, "updateobj" : { "$set" : { "hot" : true } }, "nscanned" : 600, "nscannedObjects" : 600, "nMatched" : 600, "nModified" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : NumberLong(0), "w" : NumberLong(3229) }, "timeAcquiringMicros" : { "r" : NumberLong(0), "w" : NumberLong(7) } }, "millis" : 3, "execStats" : {  }, "ts" : ISODate("2014-06-08T13:46:30.377Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
+{ "op" : "update", "ns" : "week6.m202", "query" : { "_id" : { "$gte" : ISODate("2014-07-13T00:00:00Z"), "$lt" : ISODate("2014-07-19T00:00:00Z") } }, "updateobj" : { "$set" : { "hot" : true } }, "nscanned" : 600, "nscannedObjects" : 600, "nMatched" : 600, "nModified" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : NumberLong(0), "w" : NumberLong(6211) }, "timeAcquiringMicros" : { "r" : NumberLong(0), "w" : NumberLong(10) } }, "millis" : 6, "execStats" : {  }, "ts" : ISODate("2014-06-08T13:46:30.359Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
+
+2. This step is not requied, Just adding it here as I found it browsing:
+mongos> db.m202.getShardDistribution()
+
+Shard shard0000 at localhost:30000
+ data : 140KiB docs : 3000 chunks : 32
+ estimated data per chunk : 4KiB
+ estimated docs per chunk : 93
+
+Shard shard0001 at localhost:30001
+ data : 150KiB docs : 3200 chunks : 31
+ estimated data per chunk : 4KiB
+ estimated docs per chunk : 103
+
+Totals
+ data : 290KiB docs : 6200 chunks : 63
+ Shard shard0000 contains 48.38% data, 48.38% docs in cluster, avg obj size on shard : 48B
+ Shard shard0001 contains 51.61% data, 51.61% docs in cluster, avg obj size on shard : 48B
+
+3. Stop the Balancer and move the chunks from shard000 to shard0001:
+mongos> sh.stopBalancer()
+Waiting for active hosts...
+Waiting for the balancer lock...
+mongos> db.runCommand( { moveChunk : "week6.m202", bounds : [{"_id": ISODate("2014-07-16T00:00:00Z")},{"_id": ISODate("2014-07-17T00:00:00Z")}],"to":"shard0001"})
+{ "millis" : 966, "ok" : 1 }
+mongos> db.runCommand( { moveChunk : "week6.m202", bounds : [{"_id": ISODate("2014-07-15T00:00:00Z")},{"_id": ISODate("2014-07-16T00:00:00Z")}],"to":"shard0001"})
+{ "millis" : 1084, "ok" : 1 }
+mongos> db.runCommand( { moveChunk : "week6.m202", bounds : [{"_id": ISODate("2014-07-18T00:00:00Z")},{"_id": ISODate("2014-07-19T00:00:00Z")}],"to":"shard0001"})
+{ "millis" : 906, "ok" : 1 
+
+I dont' think this is a right way to crack this problem. You can't have the balancer is stopped state in real world scenario. 
+I've posted a question in Discussion forum. I will update this, if I can manage to get the right solution. 
