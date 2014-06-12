@@ -1,0 +1,7 @@
+1. Quiz: Data integrity: Write concern
+The way I've drawn the diagrams in this lesson, you might conclude that the response time for queries with write concern greater than 1 depends primarily on the number of nodes to which the data must be replicated before a response is sent back. Which of the following factors have an effect on response time for such queries?
+
+Network latency between members of the replica set[T]
+How the members of the replica set are chained together for replication[T]
+The number of nodes the write must be replicated to[T]
+The speed at which nodes are able to execute writes[T]
