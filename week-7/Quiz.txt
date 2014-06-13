@@ -5,3 +5,21 @@ Network latency between members of the replica set[T]
 How the members of the replica set are chained together for replication[T]
 The number of nodes the write must be replicated to[T]
 The speed at which nodes are able to execute writes[T]
+
+2. Quiz: Taking actions based on the output of db.currentOp()
+The following script is dangerous. Why?
+
+killLongRunningOps = function(maxSecsRunning) {
+    currOp = db.currentOp();
+    for (oper in currOp.inprog) {
+        op = currOp.inprog[oper-0];
+        if (op.secs_running > maxSecsRunning) {
+            print("Killing opId: " + op.opid
+                    + " running over for secs: "
+                    + op.secs_running);
+            db.killOp(op.opid);
+        }
+    }
+};
+
+The script as presented in the quiz will kill all long running operations including, possibly, replication operations, connection operations, and others fundamental to MongoDB. Killing such operations can cause unpredictable behavior with your system. To see a safe version of this script, please see the GitHub gist for Adam's killLongRunningOps()[https://gist.github.com/comerford/9248866] script.
