@@ -1,0 +1,24 @@
+Final: Question 2: Config Servers
+In this assignment, you will fix a problem that sometimes arises with config servers in a sharded cluster.
+Start by running:
+$ mongo --nodb
+> cluster = new ShardingTest( { shards: 1 , rs : { nodes : [ { } ] }, config : 3 } )
+Next, click the "Initialize" button in MongoProc. This will create the problem you will need to fix.
+You can see the issue if you try to split a chunk in the 'testDB.testColl' collection with:
+db.adminCommand( { split : "testDB.testColl", middle : { _id : 7 } } )
+This will fail. Your job is to track down the problem and solve it. When you think you've got it, test it with MongoProc and submit when finished.
+Hint: You will almost certainly need to spin up your own config server separately from the ShardingTest. Make sure you use all of the same parameters used by ShardingTest when starting config servers. You can see these parameters by typing
+
+ps ax | grep mongo
+in a Linux shell.
+
+Answer:
+=======	
+1. Start the requires nodes and Initialize the data using MongoProc.
+
+2. I tried to test it immediately after Initializing it and it said: Configdb running on 29002 has some issues and I see this instace is having different data when compared to other nodes(I did an md5sum on db files)
+
+3. So I removed all the files under the dbdirectory of this configsrv and copied all the files from the other configsrv.
+
+4. Start the configsrv with same options as before: 
+mongod --port 29002 --dbpath /data/db/test-config2 --configsvr --setParameter enableTestCommands=1
