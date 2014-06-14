@@ -1,0 +1,603 @@
+Final: Question 1: User Privileges in MongoDB
+
+Spin up a server with --auth and create a user, "roland", who is a userAdminAnyDatabase and who logs in on the admin database with password "12345". Create user "vespa" who can log into the "testA" database and who has the roles of "read" and "dbAdmin" on database "testA" and "readWrite" on database "testB". Do not give "vespa" any other abilities beyond this on any database. You may use any password you like for vespa. You may point MongoProc to any host/port you like.
+
+Answer:
+=======
+
+1. I've a mongod instance already running on 27017 without auth=true, so I just logged in and created a siteUserAdmin user.
+mongo
+MongoDB shell version: 2.6.1
+connecting to: test
+> 
+> 
+> 
+> use admin
+switched to db admin
+> db.createUser(
+...   {
+...     user: "siteUserAdmin",
+...     pwd: "password",
+...     roles:
+...     [
+...       {
+...         role: "userAdminAnyDatabase",
+...         db: "admin"
+...       }
+...     ]
+...   }
+...)
+Successfully added user: {
+	"user" : "siteUserAdmin",
+	"roles" : [
+		{
+			"role" : "userAdminAnyDatabase",
+			"db" : "admin"
+		}
+	]
+}
+> ^C
+bye
+
+2. Now I restarted the same mongod instace with auth=true i.e I've uncommented the auth=true line in mongod.conf file:
+ravitezu@terminator:~$ sudo service mongod restart
+mongod stop/waiting
+mongod start/running, process 3612
+
+3. Now I logged in as SiteUserAdmin:
+mongo -u siteUserAdmin -p password --authenticationDatabase=admin
+MongoDB shell version: 2.6.1
+connecting to: test
+Error while trying to show server startup warnings: not authorized on admin to execute command { getLog: "startupWarnings" }
+> 
+> 
+> use admin
+switched to db admin
+> 
+> 
+> show users
+{
+	"_id" : "admin.siteUserAdmin",
+	"user" : "siteUserAdmin",
+	"db" : "admin",
+	"roles" : [
+		{
+			"role" : "userAdminAnyDatabase",
+			"db" : "admin"
+		}
+	]
+}
+> 
+> 
+> rs.status()
+{
+	"ok" : 0,
+	"errmsg" : "not authorized on admin to execute command { replSetGetStatus: 1.0 }",
+	"code" : 13
+}
+
+4. For listing the user permissions the following command can be used:
+> db.runCommand({usersInfo:"siteUserAdmin", showPrivileges:true})
+{
+	"users" : [
+		{
+			"_id" : "admin.siteUserAdmin",
+			"user" : "siteUserAdmin",
+			"db" : "admin",
+			"roles" : [
+				{
+					"role" : "userAdminAnyDatabase",
+					"db" : "admin"
+				}
+			],
+			"inheritedRoles" : [
+				{
+					"role" : "userAdminAnyDatabase",
+					"db" : "admin"
+				}
+			],
+			"inheritedPrivileges" : [
+				{
+					"resource" : {
+						"db" : "",
+						"collection" : ""
+					},
+					"actions" : [
+						"changeCustomData",
+						"changePassword",
+						"createRole",
+						"createUser",
+						"dropRole",
+						"dropUser",
+						"grantRole",
+						"revokeRole",
+						"viewRole",
+						"viewUser"
+					]
+				},
+				{
+					"resource" : {
+						"cluster" : true
+					},
+					"actions" : [
+						"authSchemaUpgrade",
+						"invalidateUserCache",
+						"listDatabases"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "",
+						"collection" : "system.users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.roles"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.version"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.new_users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.backup_users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				}
+			]
+		}
+	],
+	"ok" : 1
+}
+5. Now I've created the required users: 
+> use admin
+switched to db admin
+> db.createUser(
+...     {
+...       user:"roland",
+...       pwd: "12345",
+...       roles:[{role:"userAdminAnyDatabase", db:"admin"}]})
+Successfully added user: {
+	"user" : "roland",
+	"roles" : [
+		{
+			"role" : "userAdminAnyDatabase",
+			"db" : "admin"
+		}
+	]
+}
+> use testA
+switched to db testA
+> db.createUser(
+...     {
+...       user:"vespa",
+...       pwd: "12345",
+...       roles:[{role:"read", db:"testA"},{role:"dbAdmin", db:"testA"},{role:"readWrite", db:"testB"}]})
+Successfully added user: {
+	"user" : "vespa",
+	"roles" : [
+		{
+			"role" : "read",
+			"db" : "testA"
+		},
+		{
+			"role" : "dbAdmin",
+			"db" : "testA"
+		},
+		{
+			"role" : "readWrite",
+			"db" : "testB"
+		}
+	]
+}
+> db.runCommand({usersInfo:"vespa", showPrivileges:true})
+{
+	"users" : [
+		{
+			"_id" : "testA.vespa",
+			"user" : "vespa",
+			"db" : "testA",
+			"roles" : [
+				{
+					"role" : "read",
+					"db" : "testA"
+				},
+				{
+					"role" : "dbAdmin",
+					"db" : "testA"
+				},
+				{
+					"role" : "readWrite",
+					"db" : "testB"
+				}
+			],
+			"inheritedRoles" : [
+				{
+					"role" : "dbAdmin",
+					"db" : "testA"
+				},
+				{
+					"role" : "readWrite",
+					"db" : "testB"
+				},
+				{
+					"role" : "read",
+					"db" : "testA"
+				}
+			],
+			"inheritedPrivileges" : [
+				{
+					"resource" : {
+						"db" : "testA",
+						"collection" : ""
+					},
+					"actions" : [
+						"collMod",
+						"collStats",
+						"compact",
+						"convertToCapped",
+						"createCollection",
+						"createIndex",
+						"dbHash",
+						"dbStats",
+						"dropCollection",
+						"dropDatabase",
+						"dropIndex",
+						"enableProfiler",
+						"find",
+						"indexStats",
+						"killCursors",
+						"planCacheIndexFilter",
+						"planCacheRead",
+						"planCacheWrite",
+						"reIndex",
+						"renameCollectionSameDB",
+						"repairDatabase",
+						"storageDetails",
+						"validate"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testA",
+						"collection" : "system.indexes"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testA",
+						"collection" : "system.js"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testA",
+						"collection" : "system.namespaces"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testA",
+						"collection" : "system.profile"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"dropCollection",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testB",
+						"collection" : ""
+					},
+					"actions" : [
+						"collStats",
+						"convertToCapped",
+						"createCollection",
+						"createIndex",
+						"dbHash",
+						"dbStats",
+						"dropCollection",
+						"dropIndex",
+						"emptycapped",
+						"find",
+						"insert",
+						"killCursors",
+						"planCacheRead",
+						"remove",
+						"renameCollectionSameDB",
+						"update"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testB",
+						"collection" : "system.indexes"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testB",
+						"collection" : "system.js"
+					},
+					"actions" : [
+						"collStats",
+						"convertToCapped",
+						"createCollection",
+						"createIndex",
+						"dbHash",
+						"dbStats",
+						"dropCollection",
+						"dropIndex",
+						"emptycapped",
+						"find",
+						"insert",
+						"killCursors",
+						"planCacheRead",
+						"remove",
+						"renameCollectionSameDB",
+						"update"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "testB",
+						"collection" : "system.namespaces"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				}
+			]
+		}
+	],
+	"ok" : 1
+}
+> use admin
+switched to db admin
+> db.runCommand({usersInfo:"roland", showPrivileges:true})
+{
+	"users" : [
+		{
+			"_id" : "admin.roland",
+			"user" : "roland",
+			"db" : "admin",
+			"roles" : [
+				{
+					"role" : "userAdminAnyDatabase",
+					"db" : "admin"
+				}
+			],
+			"inheritedRoles" : [
+				{
+					"role" : "userAdminAnyDatabase",
+					"db" : "admin"
+				}
+			],
+			"inheritedPrivileges" : [
+				{
+					"resource" : {
+						"db" : "",
+						"collection" : ""
+					},
+					"actions" : [
+						"changeCustomData",
+						"changePassword",
+						"createRole",
+						"createUser",
+						"dropRole",
+						"dropUser",
+						"grantRole",
+						"revokeRole",
+						"viewRole",
+						"viewUser"
+					]
+				},
+				{
+					"resource" : {
+						"cluster" : true
+					},
+					"actions" : [
+						"authSchemaUpgrade",
+						"invalidateUserCache",
+						"listDatabases"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "",
+						"collection" : "system.users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.roles"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.version"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.new_users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				},
+				{
+					"resource" : {
+						"db" : "admin",
+						"collection" : "system.backup_users"
+					},
+					"actions" : [
+						"collStats",
+						"dbHash",
+						"dbStats",
+						"find",
+						"killCursors",
+						"planCacheRead"
+					]
+				}
+			]
+		}
+	],
+	"ok" : 1
+}
+
+6. Make sure MongoProc is pointed at the correct instance.
