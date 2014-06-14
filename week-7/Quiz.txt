@@ -26,3 +26,11 @@ The script as presented in the quiz will kill all long running operations includ
 Download and extract the handout if you haven't already. Using grep or some other method, determine the type of error encountered in the most recent socket exception. Enter the type of error (without the surrounding brackets) in the text field below. The error should be of the form XXXXXXX_ERROR.
 
 CONNECTION_ERROR
+
+4. Quiz: Native Auth in MongoDB 2.6
+In MongoDB 2.6, in which database are the user authorization and authentication data stored?
+
+In the database where the user logs in.
+In the admin database.[T]
+In the config database.
+In the users database.
