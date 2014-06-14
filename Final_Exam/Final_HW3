@@ -1,0 +1,181 @@
+Final: Question 3: Replica Set
+Suppose you have a 3 node replica set where 2 of the nodes are in a data center that goes down and stays down indefinitely. Your job is to bring your third server to a place where it can accept writes. For this problem, we'll only need a replica set. Start by running the following lines and waiting for each to complete.
+
+Note: You must wait for rst.startSet() to finish before executing rst.initiate(). You will know when it is finished when the log shows: "[rsStart] replSet can't get local.system.replset config from self or any seed (EMPTYCONFIG)".
+
+If you are seeing log messages appear you can still paste in each command.
+
+$ mongo --nodb
+> options = {
+    nodes: 3,
+    startPort: 27017,
+    nodeOptions: {
+        smallfiles: "",
+        noprealloc: "",
+        nopreallocj: ""
+    }
+};
+> rst = new ReplSetTest(options);
+> rst.startSet();
+> rst.initiate();
+Then click "Initialize" in MongoProc. This will tear down the servers on ports 27018 and 27019. Your job is to get the server on 27017 up, running, and able to receive writes.
+
+Please do not spin up a server on localhost:27018 or localhost:27019 or access anything in the directories where those servers pointed before they were shut down. We want to simulate a situation where a data center disappears and it is impossible to access anything there. Generally, we prefer to give you a setup where we can eliminate "wrong" ways of solving a problem, but that is difficult to do in this case.
+
+Answer:
+=======
+
+1. Start the RS and click on MongoProc Initialize. 
+
+2. Once the Initializationg is done, You will have only one Replica member alive. As other 2 nodes are dead, this 27017 node becomes SECONDARY and will not accept any writes. So you need to make this PRIMARY. 
+
+3. How to do that? Convert this 3 member RS into 1 member RS: 
+mongo --port 27017
+MongoDB shell version: 2.6.1
+connecting to: 127.0.0.1:27017/test
+Server has startup warnings: 
+2014-06-14T21:57:38.160+0530 ** WARNING: --rest is specified without --httpinterface,
+2014-06-14T21:57:38.160+0530 **          enabling http interface
+testReplSet:SECONDARY> rs.status()
+{
+	"set" : "testReplSet",
+	"date" : ISODate("2014-06-14T16:29:23Z"),
+	"myState" : 2,
+	"members" : [
+		{
+			"_id" : 0,
+			"name" : "terminator:27017",
+			"health" : 1,
+			"state" : 2,
+			"stateStr" : "SECONDARY",
+			"uptime" : 105,
+			"optime" : Timestamp(1402763263, 1),
+			"optimeDate" : ISODate("2014-06-14T16:27:43Z"),
+			"self" : true
+		},
+		{
+			"_id" : 1,
+			"name" : "terminator:27018",
+			"health" : 0,
+			"state" : 8,
+			"stateStr" : "(not reachable/healthy)",
+			"uptime" : 0,
+			"optime" : Timestamp(1402763263, 1),
+			"optimeDate" : ISODate("2014-06-14T16:27:43Z"),
+			"lastHeartbeat" : ISODate("2014-06-14T16:29:21Z"),
+			"lastHeartbeatRecv" : ISODate("2014-06-14T16:28:24Z"),
+			"pingMs" : 0,
+			"syncingTo" : "terminator:27017"
+		},
+		{
+			"_id" : 2,
+			"name" : "terminator:27019",
+			"health" : 0,
+			"state" : 8,
+			"stateStr" : "(not reachable/healthy)",
+			"uptime" : 0,
+			"optime" : Timestamp(1402763263, 1),
+			"optimeDate" : ISODate("2014-06-14T16:27:43Z"),
+			"lastHeartbeat" : ISODate("2014-06-14T16:29:22Z"),
+			"lastHeartbeatRecv" : ISODate("2014-06-14T16:28:24Z"),
+			"pingMs" : 0,
+			"syncingTo" : "terminator:27017"
+		}
+	],
+	"ok" : 1
+}
+testReplSet:SECONDARY> 
+tReplSet:SECONDARY> rs.conf()
+{
+	"_id" : "testReplSet",
+	"version" : 1,
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "terminator:27017"
+		},
+		{
+			"_id" : 1,
+			"host" : "terminator:27018"
+		},
+		{
+			"_id" : 2,
+			"host" : "terminator:27019"
+		}
+	]
+}
+testReplSet:SECONDARY> x = rs.conf()
+{
+	"_id" : "testReplSet",
+	"version" : 1,
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "terminator:27017"
+		},
+		{
+			"_id" : 1,
+			"host" : "terminator:27018"
+		},
+		{
+			"_id" : 2,
+			"host" : "terminator:27019"
+		}
+	]
+}
+testReplSet:SECONDARY> x
+{
+	"_id" : "testReplSet",
+	"version" : 1,
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "terminator:27017"
+		},
+		{
+			"_id" : 1,
+			"host" : "terminator:27018"
+		},
+		{
+			"_id" : 2,
+			"host" : "terminator:27019"
+		}
+	]
+}
+testReplSet:SECONDARY> x.members = [{"_id":0,"host" : "terminator:27017"}]
+[ { "_id" : 0, "host" : "terminator:27017" } ]
+testReplSet:SECONDARY> x
+{
+	"_id" : "testReplSet",
+	"version" : 1,
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "terminator:27017"
+		}
+	]
+}
+testReplSet:SECONDARY> rs.reconfig(x)
+{
+	"ok" : 0,
+	"errmsg" : "replSetReconfig command must be sent to the current replica set primary."
+}
+testReplSet:SECONDARY> rs.reconfig(x, {force:true})
+{ "ok" : 1 }
+testReplSet:SECONDARY> 
+testReplSet:SECONDARY> rs.conf()
+{
+	"_id" : "testReplSet",
+	"version" : 74766,
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "terminator:27017"
+		}
+	]
+}
+testReplSet:PRIMARY> 
+testReplSet:PRIMARY> 
+
+It may take some time for becoming a PRIMARY node, after running the rs.reconfig(x, {force:true})
+
