@@ -1,0 +1,200 @@
+Final: Question 4: Fixing a Bad Shard Key
+
+Suppose you have a sharded collection final_exam.m202 in a cluster with 3 shards. To set up the problem, first initialize a cluster with 3 single-server shards (not replica sets) in the mongo shell using ShardingTest:
+
+$ mongo --nodb
+> config = { d0 : { smallfiles : "", noprealloc : "", nopreallocj : ""}, d1 : { smallfiles : "", noprealloc : "", nopreallocj : "" }, d2 : { smallfiles : "", noprealloc : "", nopreallocj : ""}};
+> cluster = new ShardingTest( { shards : config } );
+Then click "Initialize" in MongoProc, which will verify that you have 3 shards and then insert test data into final_exam.m202.
+
+Unfortunately, even though your shard key {otherID: 1} has high cardinality, the data is not being distributed well among the shards. You have decided that a hashed shard key based on the _id field would be a better choice, and want to reconfigure the collection to use this new shard key. Once you have the cluster using the new shard key for final_exam.m202, test in MongoProc and turn in when correct
+
+Answer:
+=======
+1. Start the cluster with the given information and Intialize the data using MongoProc. 
+
+2. mongo --port 30999
+MongoDB shell version: 2.6.1
+connecting to: 127.0.0.1:30999/test
+mongos> sh.status()
+--- Sharding Status --- 
+  sharding version: {
+	"_id" : 1,
+	"version" : 4,
+	"minCompatibleVersion" : 4,
+	"currentVersion" : 5,
+	"clusterId" : ObjectId("539c7e4069860362228d2305")
+}
+  shards:
+	{  "_id" : "shard0000",  "host" : "localhost:30000" }
+	{  "_id" : "shard0001",  "host" : "localhost:30001" }
+	{  "_id" : "shard0002",  "host" : "localhost:30002" }
+  databases:
+	{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+	{  "_id" : "final_exam",  "partitioned" : true,  "primary" : "shard0001" }
+		final_exam.m202
+			shard key: { "otherID" : 1 }
+			chunks:
+				shard0000	1
+				shard0002	1
+				shard0001	1
+			{ "otherID" : { "$minKey" : 1 } } -->> { "otherID" : -1 } on : shard0000 Timestamp(2, 0) 
+			{ "otherID" : -1 } -->> { "otherID" : 999 } on : shard0002 Timestamp(3, 0) 
+			{ "otherID" : 999 } -->> { "otherID" : { "$maxKey" : 1 } } on : shard0001 Timestamp(3, 1) 
+
+mongos> show databases;
+admin       (empty)
+config      0.016GB
+final_exam  0.156GB
+use final_exam;
+switched to db final_exam
+mongos> show collections
+m202
+system.indexes
+mongos> 
+mongos> 
+mongos> db.system.indexes.find()
+{ "v" : 1, "key" : { "_id" : 1 }, "name" : "_id_", "ns" : "final_exam.m202" }
+{ "v" : 1, "key" : { "otherID" : 1 }, "name" : "otherID_1", "ns" : "final_exam.m202" }
+
+3. As we need to change the shard key, First we will dump the collection and restore it back and then create a _id:hashed key on it. 
+ravitezu@terminator:~/dumps$ mongodump --collection m202 --db final_exam --port 30999
+connected to: 127.0.0.1:30999
+2014-06-14T22:34:04.800+0530 DATABASE: final_exam	 to 	dump/final_exam
+2014-06-14T22:34:04.813+0530 	final_exam.m202 to dump/final_exam/m202.bson
+2014-06-14T22:34:05.323+0530 		 200000 documents
+2014-06-14T22:34:05.324+0530 	Metadata for final_exam.m202 to dump/final_exam/m202.metadata.json
+ravitezu@terminator:~/dumps$ ls
+dump
+
+4. Dump has been created and so let's drop the existing collection:
+mongos> db
+final_exam
+mongos> db.m202.drop()
+true
+mongos> show collections
+system.indexes
+
+5. Restore it back now:
+ravitezu@terminator:~/dumps$ mongorestore --db final_exam --port 30999 dump/final_exam/
+connected to: 127.0.0.1:30999
+2014-06-14T22:37:00.452+0530 dump/final_exam/m202.bson
+2014-06-14T22:37:00.452+0530 	going into namespace [final_exam.m202]
+2014-06-14T22:37:04.713+0530 		Progress: 2561500/9400000	27%	(bytes)
+2014-06-14T22:37:12.032+0530 		Progress: 3341700/9400000	35%	(bytes)
+2014-06-14T22:37:19.121+0530 		Progress: 4121900/9400000	43%	(bytes)
+2014-06-14T22:37:26.376+0530 		Progress: 4902100/9400000	52%	(bytes)
+2014-06-14T22:37:32.764+0530 		Progress: 5682300/9400000	60%	(bytes)
+2014-06-14T22:37:39.808+0530 		Progress: 6462500/9400000	68%	(bytes)
+2014-06-14T22:37:46.744+0530 		Progress: 7242700/9400000	77%	(bytes)
+2014-06-14T22:37:53.664+0530 		Progress: 8022900/9400000	85%	(bytes)
+2014-06-14T22:38:00.757+0530 		Progress: 8807800/9400000	93%	(bytes)
+200000 objects found
+2014-06-14T22:38:00.795+0530 	Creating index: { key: { _id: 1 }, name: "_id_", ns: "final_exam.m202" }
+2014-06-14T22:38:24.567+0530 	Creating index: { key: { otherID: 1 }, name: "otherID_1", ns: "final_exam.m202" }
+
+6. However it has created the index on _id and otherID, the collection isn't sharded yet: 
+mongos> sh.status()
+--- Sharding Status --- 
+  sharding version: {
+	"_id" : 1,
+	"version" : 4,
+	"minCompatibleVersion" : 4,
+	"currentVersion" : 5,
+	"clusterId" : ObjectId("539c7e4069860362228d2305")
+}
+  shards:
+	{  "_id" : "shard0000",  "host" : "localhost:30000" }
+	{  "_id" : "shard0001",  "host" : "localhost:30001" }
+	{  "_id" : "shard0002",  "host" : "localhost:30002" }
+  databases:
+	{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+	{  "_id" : "final_exam",  "partitioned" : true,  "primary" : "shard0001" }
+
+7. let's shard the collection with {_id: "hashed"}
+mongos> db.m202.findOne()
+{
+	"_id" : ObjectId("539c7e719a85db2e48ea16fb"),
+	"otherID" : 999,
+	"ts" : ISODate("2014-07-01T00:00:01.998Z")
+}
+mongos> sh.shardCollection( "final_exam.m202", { _id: "hashed" } )
+{
+	"proposedKey" : {
+		"_id" : "hashed"
+	},
+	"curIndexes" : [
+		{
+			"v" : 1,
+			"key" : {
+				"_id" : 1
+			},
+			"name" : "_id_",
+			"ns" : "final_exam.m202"
+		},
+		{
+			"v" : 1,
+			"key" : {
+				"otherID" : 1
+			},
+			"name" : "otherID_1",
+			"ns" : "final_exam.m202"
+		}
+	],
+	"ok" : 0,
+	"errmsg" : "please create an index that starts with the shard key before sharding."
+}
+mongos>//We create an index on "_id" field:
+mongos> db.m202.ensureIndex({"_id":1})
+{
+	"raw" : {
+		"localhost:30001" : {
+			"numIndexesBefore" : 2,
+			"note" : "all indexes already exist",
+			"ok" : 1
+		}
+	},
+	"ok" : 1
+}
+mongos>//However it has to be a hashed index:
+mongos> db.m202.ensureIndex({"_id":"hashed"})
+{
+	"raw" : {
+		"localhost:30001" : {
+			"createdCollectionAutomatically" : false,
+			"numIndexesBefore" : 2,
+			"numIndexesAfter" : 3,
+			"ok" : 1
+		}
+	},
+	"ok" : 1
+}
+mongos> sh.shardCollection( "final_exam.m202", { _id: "hashed" } )
+{ "collectionsharded" : "final_exam.m202", "ok" : 1 }
+mongos> 
+mongos> 
+mongos> 
+mongos> sh.status()
+--- Sharding Status --- 
+  sharding version: {
+	"_id" : 1,
+	"version" : 4,
+	"minCompatibleVersion" : 4,
+	"currentVersion" : 5,
+	"clusterId" : ObjectId("539c7e4069860362228d2305")
+}
+  shards:
+	{  "_id" : "shard0000",  "host" : "localhost:30000" }
+	{  "_id" : "shard0001",  "host" : "localhost:30001" }
+	{  "_id" : "shard0002",  "host" : "localhost:30002" }
+  databases:
+	{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+	{  "_id" : "final_exam",  "partitioned" : true,  "primary" : "shard0001" }
+		final_exam.m202
+			shard key: { "_id" : "hashed" }
+			chunks:
+				shard0001	1
+			{ "_id" : { "$minKey" : 1 } } -->> { "_id" : { "$maxKey" : 1 } } on : shard0001 Timestamp(1, 0) 
+mongos>
+
+Turn it UP! :)
