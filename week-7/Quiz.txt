@@ -44,4 +44,14 @@ s2
 s3[T]
 the mongos[T]
 
+6. Quiz: Authentication in sharded clusters: Users
+In a mongodb 2.6 setup, you have a sharded cluster with 3 shards, 's1', 's2', and 's3', plus a mongos and 3 config servers.
+One database, 'testDB', has 's3' as its primary shard, and includes only one collection, 'testColl', which is sharded and therefore present on all shards. One user, "adam", is authorized to login only to the "testDB" database. On which servers can 'adam' connect and log in? Check all that apply.
+
+The config servers[T] - As all the users are moved to admin db and which is on config server in 2.6+
+s1
+s2
+s3
+The mongos[T]
+
 Note: mtolls for analysing the logs - check mtolls in github.
