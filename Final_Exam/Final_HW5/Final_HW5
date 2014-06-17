@@ -5,7 +5,7 @@ Please examine the attached log files. In this scenario, a replica set is initia
 Before it was successfully added, there was a connection problem. What was it?
 
 A network partition
-One of the members went down while the second member was being added to the set[T] - I see DBClientCursor::init call() failed errors and these happen noramlly when we push a new rsconfig. The current PRIMARY will step down and drops all the connections and then start again.
+One of the members went down while the second member was being added to the set
 The replica set names in the configs for the two members were different
-There were too many connections to one of the members
+There were too many connections to one of the members[T]
 The replica set config points to the wrong IP address
