@@ -17,12 +17,14 @@ Answer:
 targeted=======
 I just Hacked it, I'm not sure about this!
 
-1. Enabled the profiling on both the shards and I saw only shard0000 is receving the traffic and queries are tageted at date:
+1. You can use mongostat --port 30999 --discover to see the traffic and you will see the traffic to 30000 port. Now run mongotop on that port: mongotop --port 30000 and you will see traffic is hitting week6.m202
+Enabled the profiling on both the shards "db.setProfilingLevel(2)" on week6 and I saw only shard0000 is receving the traffic and queries are tageted using date field and everything will be on shard000. Now you have to move the chunks!
 > db.system.profile.find().sort({"ts":-1})
 { "op" : "update", "ns" : "week6.m202", "query" : { "_id" : { "$gte" : ISODate("2014-07-13T00:00:00Z"), "$lt" : ISODate("2014-07-19T00:00:00Z") } }, "updateobj" : { "$set" : { "hot" : true } }, "nscanned" : 600, "nscannedObjects" : 600, "nMatched" : 600, "nModified" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : NumberLong(0), "w" : NumberLong(3229) }, "timeAcquiringMicros" : { "r" : NumberLong(0), "w" : NumberLong(7) } }, "millis" : 3, "execStats" : {  }, "ts" : ISODate("2014-06-08T13:46:30.377Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
 { "op" : "update", "ns" : "week6.m202", "query" : { "_id" : { "$gte" : ISODate("2014-07-13T00:00:00Z"), "$lt" : ISODate("2014-07-19T00:00:00Z") } }, "updateobj" : { "$set" : { "hot" : true } }, "nscanned" : 600, "nscannedObjects" : 600, "nMatched" : 600, "nModified" : 0, "keyUpdates" : 0, "numYield" : 0, "lockStats" : { "timeLockedMicros" : { "r" : NumberLong(0), "w" : NumberLong(6211) }, "timeAcquiringMicros" : { "r" : NumberLong(0), "w" : NumberLong(10) } }, "millis" : 6, "execStats" : {  }, "ts" : ISODate("2014-06-08T13:46:30.359Z"), "client" : "127.0.0.1", "allUsers" : [ ], "user" : "" }
 
-2. This step is not requied, Just adding it here as I found it browsing:
+
+2. This step is not requied, Just adding it here as I found it useful:
 mongos> db.m202.getShardDistribution()
 
 Shard shard0000 at localhost:30000
@@ -53,3 +55,5 @@ mongos> db.runCommand( { moveChunk : "week6.m202", bounds : [{"_id": ISODate("20
 
 I dont' think this is a right way to crack this problem. You can't have the balancer is stopped state in real world scenario. 
 I've posted a question in Discussion forum. I will update this, if I can manage to get the right solution. 
+
+Unfortunately, this is a right procedure :|
